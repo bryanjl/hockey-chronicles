@@ -3,21 +3,19 @@ const mongoose = require('mongoose');
 const FightSchema = new mongoose.Schema({
     teams: {
         type: [mongoose.Schema.ObjectId],
-        ref: 'Team',
-        required: [true, 'Please Add teams']
+        ref: 'Team'
     },
     players: {
         type: [mongoose.Schema.ObjectId],
-        ref: 'Player',
-        required: [true, 'Please add players']
+        ref: 'Player'
     },
     season: {
-        type: String,
-        required: [true, 'Please add a season']
+        type: mongoose.Schema.ObjectId,
+        ref: 'Season'
     },
     league: {
-        type: String,
-        required: [true, 'Please add a season']
+        type: mongoose.Schema.ObjectId,
+        ref: 'League'
     },
     date: {
         type: Date,

@@ -49,3 +49,13 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, console.log(`Server Running on PORT ${PORT}`));
 
+
+// sportsRadar
+// UN: hockeyChronicles
+// pw:#mZGj5Ezfa9UHGx
+
+// NHL
+// Key: djw7dga533uc7hqstm3dumdf
+
+// global ice hockey
+// Key: jvqtfgdrbx5snkrnuxc2yy4s

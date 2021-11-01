@@ -1,69 +1,43 @@
 const asyncHandler = require('../middleware/async');
 const Fight = require('../models/Fight');
-const Player = require('../models/Player');
-const Team = require('../models/Team');
 
+//@desc     Get a fight by ID
+//@route    GET /api/v1/fights/:id
+//@access   Public
 exports.getFight = asyncHandler(async (req, res, next) => {
     res.status(200).json({
         success: true,
         message: `route to get a fight from collection using ID of ${req.params.id}`
     })
-    
-    // let fight = await Fight.findById(req.params.id);
-
-    // res.status(200).json({
-    //     success: true,
-    //     data: fight
-    // });
 });
 
+//@desc     Create a new fight
+//@route    POST /api/v1/fights/
+//@access   Private - logged in user
 exports.createFight = asyncHandler(async (req, res, next) => {
-    // res.status(200).json({
-    //     success: true,
-    //     message: 'route to create a new fight'
-    // })
-
-    /////////////////////////////////////////////////////
-    //check if player(s) exist -> ASSUMPTION 2 players
-    //check if team(s) exist
-    ////////////////////////////////////////////////////
-    const createPlayer = async(elem) => {
-        let player = await Player.findOne({ name: elem });
-
-        if(!player){
-            console.log('no player');
-            player = await Player.create({ name: elem });
-        }
-        console.log(player);
-    }
-
-
-    let players = req.body.players;
-
-    players.forEach(element => {
-        element = element.toUpperCase();
-        console.log(element);
-        createPlayer(element);
-
-
-    });
-
-
-
-
-    let teams = req.body.teams;
-    console.log(teams[0], teams[1]);
-    // teams.forEach(element => {
-    //     console.log(element);
-    // });
-
-
-
-    // let fight = await Fight.create(req.body);
-
-    res.status(201).json({
-        success: true
-        // ,
-        // data: fight
+    res.status(200).json({
+        success: true,
+        message: 'route to create a new fight'
     });
 });
+
+//@desc     Update a fight by ID
+//@route    PUT /api/v1/fights/:id
+//@access   Private - logged in user
+exports.updateFight = asyncHandler(async (req, res, next) => {
+    res.status(200).json({
+        success: true,
+        message: `Route for updating a fight by ID of ${req.params.id}`
+    });
+});
+
+//@desc     Delete a fight by ID
+//@route    DELETE /api/v1/fights/:id
+//@access   Private - logged in user
+exports.deleteFight = asyncHandler(async (req, res, next) => {
+    res.status(200).json({
+        success: true,
+        message: `Route for deleting a fight by id of ${req.params.id}`
+    });
+});
+

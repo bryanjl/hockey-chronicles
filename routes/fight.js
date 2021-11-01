@@ -2,7 +2,9 @@ const express =  require('express');
 //import controllers
 const {
     getFight,
-    createFight
+    createFight,
+    updateFight,
+    deleteFight
 } = require('../controllers/fight');
 
 //import middleware
@@ -11,7 +13,9 @@ const router = express.Router();
 
 router
     .route('/:id')
-    .get(getFight);
+    .get(getFight)
+    .put(updateFight)
+    .delete(deleteFight);
 
 router
     .route('/')

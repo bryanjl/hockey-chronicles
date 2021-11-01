@@ -11,4 +11,4 @@ const SeasonSchema = new mongoose.Schema({
     }
 });
 
-mosule.exports = mongoose.model('Season', SeasonSchema);
+module.exports = mongoose.model('Season', SeasonSchema);

@@ -19,9 +19,13 @@ const FightSchema = new mongoose.Schema({
     },
     date: {
         type: Date,
-        require: [true, 'Please add a date']
+        required: [true, 'Please add a date']
     },
     comments: {
+        type: [mongoose.Schema.ObjectId],
+        ref: 'Comment'
+    },
+    description: {
         type: String
     },
     outcome: {

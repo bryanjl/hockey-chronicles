@@ -13,6 +13,10 @@ dotenv.config({ path: './config/config.env' });
 
 //route files
 const fights = require('./routes/fight');
+const leagues = require('./routes/league');
+const players = require('./routes/player');
+const seasons = require('./routes/season');
+const teams = require('./routes/team');
 
 //conect to DB
 connectDB();
@@ -40,6 +44,10 @@ app.use(express.json());
 
 //router mounting
 app.use('/api/v1/fights', fights);
+app.use('/api/v1/leagues', leagues);
+app.use('/api/v1/players', players);
+app.use('/api/v1/seasons', seasons);
+app.use('/api/v1/teams', teams);
 
 
 //error handler

@@ -22,7 +22,7 @@ exports.getFight = asyncHandler(async (req, res, next) => {
 //@access   Private - logged in user
 exports.createFight = asyncHandler(async (req, res, next) => {
 
-    //!!!!!!!!!!!!!!!!!!!Neeed validations and checks!!!!!!!!!!!!!! 
+    //!!!!!!!!!!!!!!!!!!!Need validations and checks!!!!!!!!!!!!!! 
 
     //get objectID to save for relations 
     req.body.league = await League.findOne({  name: req.body.league }, '_id' );
@@ -40,11 +40,24 @@ exports.createFight = asyncHandler(async (req, res, next) => {
         }
     }, '_id');
 
+    //outcome frequency counter for voting
+    let outcome = {};
+    req.body.players.forEach(element => {
+        //save as string for easy retrieval on frontend?? -> if change this must change updateOutcome method
+        // let id = element.toString().match(/"(.*?)"/);
+        outcome[element._id] = 0;
+    });
+
+    //set outcome object to request body
+    req.body.outcome = outcome;
+
     //Date of fight
     req.body.date = new Date(req.body.date);
 
     // create fight
     let fight = await Fight.create(req.body);
+
+    // fight.updateOutcome(req.body.players[0]._id, req.body.players[1]._id)
 
     //populate with data 
     fight = await Fight.findById(fight._id)
@@ -63,9 +76,30 @@ exports.createFight = asyncHandler(async (req, res, next) => {
 //@route    PUT /api/v1/fights/:id
 //@access   Private - logged in user
 exports.updateFight = asyncHandler(async (req, res, next) => {
+    //get fight by ID
+    let fight = await Fight.findById(req.params.id);
+    if(!fight){
+        //NEED PROPER ERROR HANDLING
+
+        //error handling
+        console.log(`no fight with ID of ${req.params.id}`);
+    }
+
+    //outcome update for fight winner
+    //req.body.outcome MUST have player who recieves vote at position 0 index in array
+    if(req.body.outcome){
+        //update fight outcome
+        fight.updateOutcome(req.body.outcome[0], req.body.outcome[1]);
+
+        //mark modified to save
+        fight.markModified('outcome');
+    }
+
+    fight.save();
+
     res.status(200).json({
         success: true,
-        message: `Route for updating a fight by ID of ${req.params.id}`
+        data: fight
     });
 });
 

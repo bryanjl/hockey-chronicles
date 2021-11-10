@@ -1,5 +1,10 @@
 const mongoose = require('mongoose');
 
+const League = require('../models/League');
+const Season = require('../models/Season');
+const Team = require('../models/Team');
+const Player = require('../models/Player');
+
 const FightSchema = new mongoose.Schema({
     teams: {
         type: [mongoose.Schema.ObjectId],
@@ -30,7 +35,6 @@ const FightSchema = new mongoose.Schema({
     },
     outcome: {
         type: String,
-        required: [true, 'Please add an outcome'],
         default: 'N/A'
     },
     punches: {
@@ -45,6 +49,33 @@ const FightSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'User',
     }
+});
+
+FightSchema.post('save', async function(next) {
+    let season = await Season.findById(this.season);
+    season.fights.push(this._id);
+    season.save();
+
+    let league = await League.findById(this.league);
+    league.fights.push(this._id);
+    league.save();
+
+    // console.log(this.players);
+
+    this.players.forEach(async(element) => {
+        let player = await Player.findById(element);
+        player.fights.push(this._id);
+        player.save();
+        // console.log(player);
+    });
+
+    this.teams.forEach(async(element) => {
+        let team = await Team.findById(element);
+        team.fights.push(this._id);
+        team.save();
+    });
+    
+    // next();
 });
 
 

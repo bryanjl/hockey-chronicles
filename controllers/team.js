@@ -1,4 +1,5 @@
 const asyncHandler = require('../middleware/async');
+const League = require('../models/League');
 const Team = require('../models/Team');
 
 //@desc     Get all Teams
@@ -25,9 +26,17 @@ exports.getTeam = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/teams/
 //@access   Private - logged in user
 exports.createTeam = asyncHandler(async (req, res, next) => {
+    let league = await League.findOne({ name: req.body.league });
+
+    //!!!!!!!!!!!!!!Need validation && error checking!!!!!!!!!!!!!!!!!
+
+    req.body.league = league._id;
+    
+    let team = await Team.create(req.body);
+
     res.status(200).json({
         success: true,
-        message: `Route for creating a team`
+        data: team
     });
 });
 

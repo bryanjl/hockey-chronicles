@@ -5,9 +5,14 @@ const Player = require('../models/Player');
 //@route    GET /api/v1/players/
 //@access   Public
 exports.getAllPlayers = asyncHandler(async (req, res, next) => {
+    console.log(req.params, req.query);
+
+    let player = await Player.findOne({ lastName: req.query.lastName });
+    
     res.status(200).json({
         success: true,
-        message: `Route for getting all Players`
+        message: `Route for getting all Players`,
+        data: player
     });
 });
 

@@ -25,9 +25,13 @@ exports.getLeague = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/league/
 //@access   Private - logged in user
 exports.createLeague = asyncHandler(async (req, res, next) => {
+    let league = await League.create(req.body);
+
+    // console.log(league);
+    
     res.status(200).json({
         success: true,
-        message: `Route for creating a league`
+        data: league
     });
 });
 

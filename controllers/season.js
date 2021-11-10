@@ -25,9 +25,11 @@ exports.getSeason = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/seasons/
 //@access   Private - logged in user
 exports.createSeason = asyncHandler(async (req, res, next) => {
+    let season = await Season.create(req.body);
+
     res.status(200).json({
         success: true,
-        message: `Route for creating a season`
+        data: season
     });
 });
 

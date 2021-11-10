@@ -775,3 +775,30 @@
  	 	New York Rangers	3	0	0	0	0.00	2	-1
  	 	Washington Capitals	12	0	0	0	0.00	0	0
 625.	 Kevin Maguire (RW)	Toronto Maple Leafs	17	0	0	0	0.00	74	-6
+
+
+
+
+
+Hey Steven,
+So I've done some research and started to design the database to see what we are looking at.  I would be excited to manage and build this project for you and your group and can work with your budget. 
+
+Below I will list some rough prices of the services I think we will need for this project.  
+Hosting:
+1) Database hosting - ~ $50USD/month - paid annually(~600usd) .  This service would host all your information in the database.  I would recommend using a cloud service with the subscription price.  This way your data is always available and can be relied upon.  $50usd is a maximum price and it's very possible the cost can be reduced based on the data we decide upon.
+2)Website/Domain hosting - ~$250USD/per year.  This is the introductory price for many hosting/domain providers.  It is likely to slightly increase in the second year of hosting but not by much.  
+Services:
+1) SportsRadar API:  This is a service that is completely up to you.  Basically this service will provide us with additional information on players, teams, leagues, etc.  They can provide images, stats, video(maybe) at no additional hosting costs.  This is a subscription based service and their pricing differs from project to project but it is roughly $285usd.  It would add a little extra to the hockey chronicles website in far as appearance but is not necessary.  This service can also be added at a later time - with additional labour costs.
+2)Visual Design:  This is something that I would like to outsource to another person.  Branden has offered his time to complete the visual design of this project but I am not sure his schedule and availability.  I have a few other designers that I have worked with in the past and I am confident in their skills.  I would have to talk further with someone about prices for design but I would reserve around $1000usd for this part.
+3) Database/API development: I would develop the database and the API(code for connecting DB to website).  I have estimated that this section would take roughly 100hours of development, testing and deployment.  
+4) Website development:  I would also develop the user interface/website.  I would make the website connect to the DB/API and create full functionality.  This is going to include users/member login, searching DB, accessing data in ordered lists(by season, league, player, etc), profiles on players(like the tie domi page from DYG).  I have estimated this section to take 100-150 hours of development with an additional design cost.  
+Roughly, I would spend 200-250 hours on developing this project.  
+
+My breakdown:
+
+Hosting: ~$850USDDesign: ~1000USD --------------------------=             ~$1850USD
+
+Development costs:
+250hours at $15USD/hour = ~$3750USD
+
+total: ~$5600USD

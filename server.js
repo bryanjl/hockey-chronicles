@@ -1,6 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+const errorHandler = require('./middleware/error');
 //security
 // const mongoSanitize = require('express-mongo-sanitize');
 // const helmet = require('helmet');
@@ -50,12 +51,19 @@ app.use('/api/v1/seasons', seasons);
 app.use('/api/v1/teams', teams);
 
 
-//error handler
-// app.use(errorHandler);
+//Mount Error handler
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, console.log(`Server Running on PORT ${PORT}`));
+const server = app.listen(PORT, console.log(`Server Running on PORT ${PORT}`));
+
+//unhandled promise rejections handler
+process.on('unhandledRejection', (err, promise) => {
+    console.log(`error: ${err.message}`);
+    //close the server
+    server.close(() => process.exit(1));
+});
 
 
 // sportsRadar

@@ -15,10 +15,13 @@ const Player = require('../models/Player');
 //@route    GET /api/v1/fights/:id
 //@access   Public
 exports.getFight = asyncHandler(async (req, res, next) => {
-    res.status(200).json({
-        success: true,
-        message: `route to get a fight from collection using ID of ${req.params.id}`
-    })
+    //find fight by ID
+    let fight  = await Fight.findById(req.params.id);
+    if(!fight){
+        return next(new ErrorResponse(`Fight with id of ${req.params.id} not found`, 404));
+    }
+
+    sendPopulatedResponse(fight, 200, res);
 });
 
 //@desc     Create a new fight
@@ -123,6 +126,7 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
 //@route    DELETE /api/v1/fights/:id
 //@access   Private - logged in user
 exports.deleteFight = asyncHandler(async (req, res, next) => {
+    //fights should not be deleted -> no method/function
     res.status(200).json({
         success: true,
         message: `Route for deleting a fight by id of ${req.params.id}`

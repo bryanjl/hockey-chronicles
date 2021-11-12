@@ -9,12 +9,16 @@ const {
 } = require('../controllers/player');
 
 //import middleware
+const advancedResults = require('../middleware/advancedResults');
+
+//Models
+const Player = require('../models/Player');
 
 const router = express.Router();
 
 router
     .route('/')
-    .get(getAllPlayers)
+    .get(advancedResults(Player, {path: 'fights', select: 'teams'}, 'lastName'), getAllPlayers)
     .post(createPlayer);
 
 router

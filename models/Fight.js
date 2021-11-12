@@ -38,11 +38,7 @@ const FightSchema = new mongoose.Schema({
     },
     videoLink: {
         type: String
-    },
-    // punches: {
-    //     type: String,
-    //     default: 'N/A'
-    // }    
+    },  
     createdAt: {
         type: Date,
         default: Date.now()

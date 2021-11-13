@@ -9,12 +9,36 @@ const {
 } = require('../controllers/season');
 
 //import middleware
+const advancedResults = require('../middleware/advancedResults');
+
+//models
+const Season = require('../models/Season');
 
 const router = express.Router();
 
 router
     .route('/')
-    .get(getAllSeasons)
+    .get(advancedResults(Season, {
+        path: 'fights', 
+        populate: [
+            { 
+                path: 'teams', 
+                select: 'name city'
+            },
+            {
+                path: 'players',
+                select: 'lastName firstName'
+                
+            },
+            {
+                path: 'league',
+                select: 'name'
+            },
+            {
+                path: 'season',
+                select: 'season'
+            }
+        ]}, 'season'), getAllSeasons)
     .post(createSeason);
 
 router

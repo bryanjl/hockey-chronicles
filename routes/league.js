@@ -9,12 +9,36 @@ const {
 } = require('../controllers/league');
 
 //import middleware
+const advancedResults = require('../middleware/advancedResults');
+
+//models
+const League = require('../models/League');
 
 const router = express.Router();
 
 router
     .route('/')
-    .get(getAllLeagues)
+    .get(advancedResults(League, {
+        path: 'fights', 
+        populate: [
+            { 
+                path: 'teams', 
+                select: 'name city'
+            },
+            {
+                path: 'players',
+                select: 'lastName firstName'
+                
+            },
+            {
+                path: 'league',
+                select: 'name'
+            },
+            {
+                path: 'season',
+                select: 'season'
+            }
+        ]}, 'name'), getAllLeagues)
     .post(createLeague);
 
 router

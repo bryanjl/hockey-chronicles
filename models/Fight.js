@@ -86,7 +86,7 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
     let currentWinner;
 
     if(this.outcome[player1] === this.outcome[player2]){
-        currentWinner = "";
+        currentWinner = "hhh";
     } else if(this.outcome[player1] > this.outcome[player2]){
         currentWinner = player1;
     } else {
@@ -100,32 +100,42 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
     let newWinner;
 
     if(this.outcome[player1] === this.outcome[player2]){
-        newWinner = "";
+        newWinner = "hhh";
+        return;
     } else if(this.outcome[player1] > this.outcome[player2]){
         newWinner = player1;
     } else {
         newWinner = player2;
     }
 
+    console.log(currentWinner, newWinner);
+
     //check if winner outcome has changed
     if(currentWinner === newWinner){
         //if currentWinner is equal to newWinner no change needed to player stats
-        console.log('No change');
+        // console.log('No change');
         return;
     } else {        
         //if there is a change only player1 can become winner
         let winningPlayer = await Player.findById(player1);
-        // console.log(winningPlayer);
-
+        
         //UPDATE winning player stats
-
+        winningPlayer.wins += 1;
+        if(winningPlayer.losses > 0){
+            winningPlayer.losses -= 1;
+        }
+        
+        winningPlayer.save();
 
         let losingPlayer = await Player.findById(player2);
-        // console.log(losingPlayer);
 
         //UPDATE losing player stats
-        
-        //update player.wins stats +1 for winner -1 for loser
+        losingPlayer.losses += 1;
+        if(losingPlayer.wins > 0){
+            losingPlayer.wins -= 1;
+        }
+
+        losingPlayer.save();
     }
 }
 

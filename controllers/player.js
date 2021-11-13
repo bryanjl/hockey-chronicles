@@ -29,36 +29,72 @@ exports.getPlayer = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/players/
 //@access   Private - logged in user
 exports.createPlayer = asyncHandler(async (req, res, next) => {
-    res.status(200).json({
-        success: true,
-        message: `Route for creating a player`
-    });
+    let player = await Player.create(req.body);
+
+    sendPopulatedResponse(player, 200, res);
 });
 
 //@desc     Update a player
 //@route    PUT /api/v1/players/:id
 //@access   Private - logged in user
 exports.updatePlayer = asyncHandler(async (req, res, next) => {
-    res.status(200).json({
-        success: true,
-        message: `Route for updating a player`
-    });
+    let player = await Player.findById(req.params.id);
+    if(!player){
+        return next(new ErrorResponse(`Player with id ${req.params.id} not found`, 404));
+    }
+
+    //Cannot update/change wins, losses, or fights
+    if(req.body.wins || req.body.losses || req.body.fights){
+        return next(new ErrorResponse(`Cannot update wins, losses or fights of a Player`, 400));
+    }
+
+    player = await Player.findByIdAndUpdate(req.params.id, req.body);
+
+    sendPopulatedResponse(player, 200, res);
 });
 
 //@desc     Delete a player by ID
 //@route    DELETE /api/v1/league/:id
 //@access   Private - SUPER-ADMIN
 exports.deletePlayer = asyncHandler(async (req, res, next) => {
+    //MUST HAVE ADMIN PRIVALEGES - MIDDLEWARE
+
+    let player = await Player.findById(req.params.id);
+    if(!player){
+        return next(new ErrorResponse(`Player with ID ${req.params.id} Not Found`, 404));
+    }
+
+    await Player.findByIdAndDelete(req.params.id);
+
     //No need to delete player 
     res.status(200).json({
         success: true,
-        message: `Route for deleting a player with id of ${req.params.id}`
+        message: `Player with ID of ${req.params.id} removed from database`
     });
 }); 
 
 const sendPopulatedResponse = asyncHandler(async function (player, statusCode, res){
     player = await Player.findById(player.id)
-        .populate('fights', 'teams players season league date');
+        .populate({
+            path: 'fights', 
+            populate: [{ 
+                path: 'teams', 
+                select: 'name city'
+            },
+            {
+                path: 'players',
+                select: 'lastName firstName'
+                 
+            },
+            {
+                path: 'league',
+                select: 'name'
+            },
+            {
+                path: 'season',
+                select: 'season'
+            }]
+        });
 
     res.status(statusCode).json({
         success: true,

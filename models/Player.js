@@ -16,6 +16,14 @@ const PlayerSchema = new mongoose.Schema({
     fights: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Fight'
+    },
+    wins: {
+        type: Number,
+        default: 0
+    },
+    losses: {
+        type: Number,
+        default: 0
     }
 });
 

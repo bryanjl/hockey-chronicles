@@ -20,24 +20,25 @@ router
     .route('/')
     .get(advancedResults(Player, {
         path: 'fights', 
-        populate: [{ 
-            path: 'teams', 
-            select: 'name city'
-        },
-        {
-            path: 'players',
-            select: 'lastName firstName'
-             
-        },
-        {
-            path: 'league',
-            select: 'name'
-        },
-        {
-            path: 'season',
-            select: 'season'
-        }]
-    }, 'lastName'), getAllPlayers)
+        populate: [
+            { 
+                path: 'teams', 
+                select: 'name city'
+            },
+            {
+                path: 'players',
+                select: 'lastName firstName'
+                
+            },
+            {
+                path: 'league',
+                select: 'name'
+            },
+            {
+                path: 'season',
+                select: 'season'
+            }
+        ]}, 'lastName'), getAllPlayers)
     .post(createPlayer);
 
 router

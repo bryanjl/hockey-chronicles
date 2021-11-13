@@ -74,7 +74,7 @@ exports.deletePlayer = asyncHandler(async (req, res, next) => {
 }); 
 
 const sendPopulatedResponse = asyncHandler(async function (player, statusCode, res){
-    player = await Player.findById(player.id)
+    player = await Player.findById(player._id)
         .populate({
             path: 'fights', 
             populate: [{ 
@@ -99,5 +99,5 @@ const sendPopulatedResponse = asyncHandler(async function (player, statusCode, r
     res.status(statusCode).json({
         success: true,
         data: player
-    })
+    });
 });

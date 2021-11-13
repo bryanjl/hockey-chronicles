@@ -25,7 +25,7 @@ const advancedResults = (model, populate, sortBy) => async (req, res, next) => {
     if(req.query.select){
         let fields = req.query.select.split(',').join(' ');
         query = query.select(fields);
-        console.log(query);
+        // console.log(query);
     }
 
     //SORT BY -> sort properties of query object

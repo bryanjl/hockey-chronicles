@@ -38,6 +38,24 @@ const FightSchema = new mongoose.Schema({
     },
     videoLink: {
         type: String
+    },
+    gameType: {
+        type: String,
+        enum: ['Regular', 'Round 1', 'Preseason', 'Quarter Final', 'Semi Final', 'Final'],
+        default: 'Regular'
+    },
+    fightType: {
+        type: String,
+        enum: ['Rough', 'Cheap', 'Brawl', 'Refused', 'Hit', 'Fight'],
+        default: 'Fight'
+    },
+    funRating: {
+        type: Number,
+        default: 0
+    },
+    unfair: {
+        type: Boolean,
+        default: false
     },  
     createdAt: {
         type: Date,

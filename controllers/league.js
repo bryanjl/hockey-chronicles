@@ -40,6 +40,14 @@ exports.updateLeague = asyncHandler(async (req, res, next) => {
     if(!league){
         return next(new ErrorResponse(`League with ID ${req.params.id} Not Found`, 404));
     }
+
+    if(req.body.name){
+        req.body.name = req.body.name.toUpperCase();
+    }
+
+    if(req.body.fights){
+        return next(new ErrorResponse(`Cannot update fights of a season`, 400));
+    }
     
     league = await League.findByIdAndUpdate(req.params.id, req.body);
 

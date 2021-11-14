@@ -28,7 +28,7 @@ exports.createSeason = asyncHandler(async (req, res, next) => {
     //check proper format
     let seasonFormat = /(19|20)\d{2}-(19|20)\d{2}/g;
     if(!seasonFormat.test(req.body.season)){
-        return next(new ErrorResponse(`Please use proper format YYYY-YYYY for seasons`));
+        return next(new ErrorResponse(`Please use proper format YYYY-YYYY for seasons`, 400));
     }
     
     let season = await Season.create(req.body);
@@ -47,6 +47,11 @@ exports.updateSeason = asyncHandler(async (req, res, next) => {
 
     if(req.body.fights){
         return next(new ErrorResponse(`Cannot update fights of a season`, 400));
+    }
+
+    let seasonFormat = /(19|20)\d{2}-(19|20)\d{2}/g;
+    if(!seasonFormat.test(req.body.season)){
+        return next(new ErrorResponse(`Please use proper format YYYY-YYYY for seasons`, 400));
     }
 
     season = await Season.findByIdAndUpdate(req.params.id, req.body);

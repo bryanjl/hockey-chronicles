@@ -64,14 +64,3 @@ process.on('unhandledRejection', (err, promise) => {
     //close the server
     server.close(() => process.exit(1));
 });
-
-
-// sportsRadar
-// UN: hockeyChronicles
-// pw:#mZGj5Ezfa9UHGx
-
-// NHL
-// Key: djw7dga533uc7hqstm3dumdf
-
-// global ice hockey
-// Key: jvqtfgdrbx5snkrnuxc2yy4s

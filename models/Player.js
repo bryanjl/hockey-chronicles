@@ -24,6 +24,24 @@ const PlayerSchema = new mongoose.Schema({
     losses: {
         type: Number,
         default: 0
+    },
+    draw: {
+        type: Number,
+        default: 0
+    },
+    unfairTally: {
+        type: Number,
+        default: 0
+    },
+    funRating: {
+        type: Number,
+        default: 0
+    },
+    height: {
+        type: String
+    },
+    weight: {
+        type: String 
     }
 });
 

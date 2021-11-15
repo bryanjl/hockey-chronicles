@@ -33,9 +33,8 @@ const PlayerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    funRating: {
-        type: Number,
-        default: 0
+    actionRating: {
+        type: Object
     },
     height: {
         type: String
@@ -44,5 +43,17 @@ const PlayerSchema = new mongoose.Schema({
         type: String 
     }
 });
+
+PlayerSchema.methods.updateActionRating = async function(newScore){
+    let currAverage = this.actionRating.average;
+    let votes = this.actionRating.votes;
+
+    currAverage = ((currAverage * votes) + newScore) / (votes + 1);
+
+    this.actionRating.average = currAverage;
+    this.actionRating.votes += 1;
+
+    // this.save();
+}
 
 module.exports = mongoose.model('Player', PlayerSchema);

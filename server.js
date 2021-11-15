@@ -26,7 +26,7 @@ const app = express();
 
 // logger for dev mode
 if(process.env.NODE_ENV === 'development'){
-    app.use(morgan('dev'));
+    app.use(morgan('dev')); 
 }
 
 // if(Process.env.NODE_ENV === 'production'){

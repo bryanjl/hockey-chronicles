@@ -29,6 +29,14 @@ exports.getPlayer = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/players/
 //@access   Private - logged in user
 exports.createPlayer = asyncHandler(async (req, res, next) => {
+    //action rating average - freq counter
+    let actionRating = {
+        average: 0,
+        votes: 0
+    };
+    //set actionRating to request body
+    req.body.actionRating = actionRating;
+
     let player = await Player.create(req.body);
 
     sendPopulatedResponse(player, 200, res);

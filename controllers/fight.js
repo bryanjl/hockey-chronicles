@@ -76,9 +76,16 @@ exports.createFight = asyncHandler(async (req, res, next) => {
     req.body.players.forEach(element => {
         outcome[element._id] = 0;
     });
-
     //set outcome object to request body
     req.body.outcome = outcome;
+
+    //action rating average - freq counter
+    let actionRating = {
+        average: 0,
+        votes: 0
+    };
+    //set actionRating to request body
+    req.body.actionRating = actionRating;    
 
     //Date of fight
     req.body.date = new Date(req.body.date);
@@ -117,7 +124,17 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
         fight.markModified('outcome');
     }
 
-    fight.save();
+    //set actionRating
+    if(req.body.actionRating){
+        if(req.body.actionRating < 0 || req.body.actionRating > 10){
+            return next(new ErrorResponse(`Action Rating must be between 0 and 10`, 400));
+        }
+
+        fight.updateActionRating(req.body.actionRating);
+        fight.markModified('actionRating');
+    }
+
+    await fight.save();
 
     sendPopulatedResponse(fight, 200, res);
 });

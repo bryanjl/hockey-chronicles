@@ -50,7 +50,7 @@ PlayerSchema.methods.updateActionRating = async function(newScore){
 
     currAverage = ((currAverage * votes) + newScore) / (votes + 1);
 
-    this.actionRating.average = currAverage;
+    this.actionRating.average = currAverage.toFixed(2);
     this.actionRating.votes += 1;
 
     // this.save();

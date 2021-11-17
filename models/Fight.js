@@ -132,6 +132,7 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
         }
         drawPlayer1.save();
 
+        
         drawPlayer2.draw += 1;
         if(drawPlayer2.wins > 0) {
             drawPlayer2.wins -= 1;
@@ -145,7 +146,7 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
         newWinner = player2;
     }
 
-    // console.log(currentWinner, newWinner);
+    console.log(currentWinner, newWinner);
 
     //check if winner outcome has changed
     if(currentWinner === newWinner){
@@ -158,7 +159,10 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
         
         //UPDATE winning player stats
         winningPlayer.wins += 1;
-        winningPlayer.draw -= 1;
+        if(winningPlayer.draw > 0){
+            winningPlayer.draw -= 1;
+        }
+        
         if(winningPlayer.losses > 0){
             winningPlayer.losses -= 1;
         }
@@ -169,7 +173,10 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
 
         //UPDATE losing player stats
         losingPlayer.losses += 1;
-        losingPlayer.draw -= 1;
+        if(losingPlayer.draw > 0){
+            losingPlayer.draw -= 1;
+        }
+        
         if(losingPlayer.wins > 0){
             losingPlayer.wins -= 1;
         }
@@ -199,6 +206,35 @@ FightSchema.methods.updateActionRating = async function(newScore) {
     await player1.save();
     await player2.save();
     // console.log(player1, player2);
+}
+
+FightSchema.methods.updateUnfair = async function(newUnfair){
+    // console.log(this.unfair, newUnfair);
+
+    if(this.unfair === newUnfair){
+        // console.log('here');
+        return;
+    }
+    
+    this.unfair = newUnfair;
+
+    let player1 = await Player.findById(this.players[0]);
+    let player2 = await Player.findById(this.players[1]);
+
+    if(newUnfair){
+        player1.unfairTally += 1;
+        player2.unfairTally += 1;
+    } else {
+        if(player1.unfairTally > 0){
+            player1.unfairTally -= 1;
+        }
+        if(player2.unfairTally > 0){
+            player2.unfairTally -= 1;
+        }    
+    }
+
+    await player1.save();
+    await player2.save();
 }
 
 module.exports = mongoose.model('Fight', FightSchema);

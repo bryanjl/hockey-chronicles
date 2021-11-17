@@ -29,6 +29,11 @@ exports.getFight = asyncHandler(async (req, res, next) => {
 //@access   Private - logged in user
 exports.createFight = asyncHandler(async (req, res, next) => { 
 
+    if(Array.isArray(req.body)){
+        await Fight.insertMany(req.body);
+        return;
+    }
+
     //get objectID to save for relations 
     let league = await League.findOne({  name: req.body.league.toUpperCase() }, '_id' );
     if(!league){
@@ -117,11 +122,17 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
             return next(new ErrorResponse(`Please have 2 players`, 400));
         }
 
+        if(!fight.outcome[req.body.outcome[0]] || !fight.outcome[req.body.outcome[1]]){
+            return next(new ErrorResponse(`The players you submitted are not part of this fight`, 400));
+        }
+
         //update fight outcome
         fight.updateOutcome(req.body.outcome[0], req.body.outcome[1]);
 
         //mark modified to save
         fight.markModified('outcome');
+        //remove from req.body
+        delete req.body.outcome;
     }
 
     //set actionRating
@@ -132,9 +143,25 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
 
         fight.updateActionRating(req.body.actionRating);
         fight.markModified('actionRating');
+        //remove from req.body
+        delete req.body.actionRating;
     }
 
+    if(req.body.unfair === true || req.body.unfair === false){
+        fight.updateUnfair(req.body.unfair);
+        fight.markModified('unfair');
+        //remove from req.body
+        delete req.body.unfair;
+    }
+
+    console.log(req.body);
+
     await fight.save();
+
+    if(Object.keys(req.body).length > 0){
+        console.log('here');
+        fight = await Fight.findByIdAndUpdate(req.params.id, req.body);
+    }
 
     sendPopulatedResponse(fight, 200, res);
 });

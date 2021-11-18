@@ -44,9 +44,10 @@ const PlayerSchema = new mongoose.Schema({
     }
 });
 
-PlayerSchema.methods.updateActionRating = async function(newScore){
+PlayerSchema.methods.updateActionRating = async function(newScore, newVotes = 0){
+    //new Vites needs to be fixed.
     let currAverage = this.actionRating.average;
-    let votes = this.actionRating.votes;
+    let votes = this.actionRating.votes + newVotes;
 
     currAverage = ((currAverage * votes) + newScore) / (votes + 1);
 

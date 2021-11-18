@@ -28,12 +28,6 @@ exports.getFight = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/fights/
 //@access   Private - logged in user
 exports.createFight = asyncHandler(async (req, res, next) => { 
-
-    if(Array.isArray(req.body)){
-        await Fight.insertMany(req.body);
-        return;
-    }
-
     //get objectID to save for relations 
     let league = await League.findOne({  name: req.body.league.toUpperCase() }, '_id' );
     if(!league){
@@ -79,7 +73,7 @@ exports.createFight = asyncHandler(async (req, res, next) => {
     //outcome frequency counter for voting
     let outcome = {};
     req.body.players.forEach(element => {
-        outcome[element._id] = 0;
+        outcome[element._id] = 1;
     });
     //set outcome object to request body
     req.body.outcome = outcome;
@@ -118,16 +112,20 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
     //outcome update for fight winner
     //req.body.outcome MUST have player who recieves vote at position 0 index in array
     if(req.body.outcome){
+        // console.log(req.body.outcome[0]);
+        // console.log(fight.outcome[req.body.outcome[0]], fight.outcome[req.body.outcome[1]]);
         if(req.body.outcome.length != 2){
             return next(new ErrorResponse(`Please have 2 players`, 400));
         }
 
+        //!!!!This needs to be fixed -> 0 is falsy null is falsy
+            //temp fix set original outcome to 1:1
         if(!fight.outcome[req.body.outcome[0]] || !fight.outcome[req.body.outcome[1]]){
             return next(new ErrorResponse(`The players you submitted are not part of this fight`, 400));
         }
 
         //update fight outcome
-        fight.updateOutcome(req.body.outcome[0], req.body.outcome[1]);
+        await fight.updateOutcome(req.body.outcome[0], req.body.outcome[1]);
 
         //mark modified to save
         fight.markModified('outcome');
@@ -141,26 +139,38 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
             return next(new ErrorResponse(`Action Rating must be between 0 and 10`, 400));
         }
 
-        fight.updateActionRating(req.body.actionRating);
+        await fight.updateActionRating(req.body.actionRating);
         fight.markModified('actionRating');
         //remove from req.body
         delete req.body.actionRating;
     }
 
     if(req.body.unfair === true || req.body.unfair === false){
-        fight.updateUnfair(req.body.unfair);
+        await fight.updateUnfair(req.body.unfair);
         fight.markModified('unfair');
         //remove from req.body
         delete req.body.unfair;
     }
 
-    console.log(req.body);
+    if(req.body.players){
+        if(req.body.players.length < 2 || req.body.players > 2){
+            return next(new ErrorResponse(`You can only change two players - The first player is the player to remove and the second player is the player to add`));
+        }
+        //req.body.players is array -> [0] is the player to change [1] is the player to change to
+        await fight.updatePlayers(req.body.players);
+        fight.markModified('outcome');
+        fight.markModified('players');
+        delete req.body.players;
+    }
+
+    // console.log(req.body);
 
     await fight.save();
 
     if(Object.keys(req.body).length > 0){
-        console.log('here');
+        // console.log('here');
         fight = await Fight.findByIdAndUpdate(req.params.id, req.body);
+
     }
 
     sendPopulatedResponse(fight, 200, res);

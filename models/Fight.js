@@ -146,7 +146,7 @@ FightSchema.methods.updateOutcome = async function(player1, player2) {
         newWinner = player2;
     }
 
-    console.log(currentWinner, newWinner);
+    // console.log(currentWinner, newWinner);
 
     //check if winner outcome has changed
     if(currentWinner === newWinner){
@@ -235,6 +235,91 @@ FightSchema.methods.updateUnfair = async function(newUnfair){
 
     await player1.save();
     await player2.save();
+}
+
+FightSchema.methods.updatePlayers = async function(playersToChange){
+    //get player that isn't changing
+    let playersArr = this.players;
+    let index = playersArr.indexOf(playersToChange[0]);
+    if(index > -1){
+        playersArr.splice(index, 1);
+    }
+    let otherPlayer = playersArr[0];
+
+    let stats = {
+        wins: 0,
+        losses: 0,
+        draw: 0
+    };
+
+    //unfair tally to change players
+    let unfairTally;
+    this.unfair ? unfairTally = 1 : unfairTally = 0;
+    stats.unfairTally = unfairTally;
+
+    //actionRating
+    stats.actionRating = this.actionRating.average;
+    stats.votes = this.actionRating.votes;
+
+    //Win loss or draw
+    if(this.outcome[this.players[0]] === this.outcome[this.players[1]]){
+        stats.draw = 1;
+    } else if(this.outcome[playersToChange[0]] > this.outcome[otherPlayer]){
+        stats.wins = 1;
+    } else {
+        stats.losses = 1;
+    }
+
+    //outcome
+    stats.outcome = this.outcome[playersToChange[[0]]];
+    
+    console.log(stats);
+
+    //get Players
+    let playerToRemove = await Player.findById(playersToChange[0]);
+    let playerToAdd = await Player.findById(playersToChange[1]);
+
+    // console.log(playerToRemove, playerToAdd);
+
+    // console.log(this.outcome);
+    // let newOutcome = this.outcome;
+    delete this.outcome[playersToChange[0]];
+    this.outcome[playersToChange[1]] = stats.outcome;
+    // this.outcome = newOutcome;
+    // console.log(this.outcome);
+
+    playerToRemove.wins += -stats.wins;
+    playerToRemove.losses += -stats.losses;
+    playerToRemove.draw += -stats.draw;
+
+    playerToAdd.wins += stats.wins;
+    playerToAdd.losses += stats.losses;
+    playerToAdd.draw += stats.draw;
+
+    //this needs to be fixed.
+    await playerToRemove.updateActionRating(-stats.actionRating, -stats.votes);
+    await playerToAdd.updateActionRating(stats.actionRating, stats.votes);
+
+    playerToAdd.markModified('actionRating');
+    playerToRemove.markModified('actionRating');
+
+    playerToRemove.unfairTally += -stats.unfairTally;
+    playerToAdd.unfairTally += stats.unfairTally;
+
+    playerToAdd.fights.push(this._id);
+    let fightIndex = playerToRemove.fights.indexOf(this._id);
+    playerToRemove.fights.splice(fightIndex, 1);
+    playerToAdd.markModified('fights');
+    playerToRemove.markModified('fights');
+    console.log(playerToRemove.fights);
+    // console.log(fightIndex);
+
+    this.players = [otherPlayer, playersToChange[1]];
+    console.log(this.players);
+
+    await playerToRemove.save();
+    await playerToAdd.save();
+
 }
 
 module.exports = mongoose.model('Fight', FightSchema);

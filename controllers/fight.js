@@ -152,9 +152,16 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
         delete req.body.unfair;
     }
 
+    //change the players of a fight
     if(req.body.players){
         if(req.body.players.length < 2 || req.body.players > 2){
             return next(new ErrorResponse(`You can only change two players - The first player is the player to remove and the second player is the player to add`));
+        }
+        if(!fight.players.includes(req.body.players[0])){
+            return next(new ErrorResponse(`Player to change is not part of this fight`, 400));
+        }
+        if(fight.players.includes(req.body.players[1])){
+            return next(new ErrorResponse(`The player you would like to add to this fight is already a part of this fight`, 400));
         }
         //req.body.players is array -> [0] is the player to change [1] is the player to change to
         await fight.updatePlayers(req.body.players);
@@ -163,10 +170,46 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
         delete req.body.players;
     }
 
-    // console.log(req.body);
+    //change the teams
+    if(req.body.teams){
+        //check req.body.teams format
+        //must be two teams
+        if(req.body.teams.length != 2){
+            return next(new ErrorResponse(`Make sure there are two teams in your request`, 400));
+        }
+        //make sure team to change is part of the fight
+        if(!fight.teams.includes(req.body.teams[0])){
+            return next(new ErrorResponse(`The team to change is not part of this fight`, 400));
+        }
+        //make sure team to change to is not part of the fight
+        if(fight.teams.includes(req.body.teams[1])){
+            return next(new ErrorResponse(`The team you would like to add is already part of this fight`, 400));
+        }
+
+        //first item is team to change and second item is team to change to
+        await fight.updateTeams(req.body.teams);
+        fight.markModified('teams');
+        delete req.body.teams;
+    }
+
+    //change the seasons
+    if(req.body.season){
+        //check format
+
+        await fight.updateSeason(req.body.season);
+        fight.markModified('season');
+        delete req.body.season;
+    }
+
+    if(req.body.league){
+        await fight.updateLeague(req.body.league);
+        fight.markModified('league');
+        delete req.body.league;
+    }
 
     await fight.save();
 
+    //update fight with left over information
     if(Object.keys(req.body).length > 0){
         // console.log('here');
         fight = await Fight.findByIdAndUpdate(req.params.id, req.body);

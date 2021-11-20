@@ -44,17 +44,15 @@ const PlayerSchema = new mongoose.Schema({
     }
 });
 
-PlayerSchema.methods.updateActionRating = async function(newScore, newVotes = 0){
+PlayerSchema.methods.updateActionRating = async function(newScore){
     //new Vites needs to be fixed.
     let currAverage = this.actionRating.average;
-    let votes = this.actionRating.votes + newVotes;
+    let votes = this.actionRating.votes;
 
     currAverage = ((currAverage * votes) + newScore) / (votes + 1);
 
     this.actionRating.average = currAverage.toFixed(2);
     this.actionRating.votes += 1;
-
-    // this.save();
 }
 
 module.exports = mongoose.model('Player', PlayerSchema);

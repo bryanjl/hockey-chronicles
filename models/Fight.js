@@ -246,6 +246,7 @@ FightSchema.methods.updatePlayers = async function(playersToChange){
     }
     let otherPlayer = playersArr[0];
 
+    //stats obj to update players/fight
     let stats = {
         wins: 0,
         losses: 0,
@@ -272,22 +273,17 @@ FightSchema.methods.updatePlayers = async function(playersToChange){
 
     //outcome
     stats.outcome = this.outcome[playersToChange[[0]]];
-    
-    console.log(stats);
 
     //get Players
     let playerToRemove = await Player.findById(playersToChange[0]);
     let playerToAdd = await Player.findById(playersToChange[1]);
 
-    // console.log(playerToRemove, playerToAdd);
-
-    // console.log(this.outcome);
-    // let newOutcome = this.outcome;
+    //update the outcome freq counter
     delete this.outcome[playersToChange[0]];
     this.outcome[playersToChange[1]] = stats.outcome;
-    // this.outcome = newOutcome;
-    // console.log(this.outcome);
 
+    //change players stats
+    //wins-loss-draw
     playerToRemove.wins += -stats.wins;
     playerToRemove.losses += -stats.losses;
     playerToRemove.draw += -stats.draw;
@@ -296,30 +292,89 @@ FightSchema.methods.updatePlayers = async function(playersToChange){
     playerToAdd.losses += stats.losses;
     playerToAdd.draw += stats.draw;
 
-    //this needs to be fixed.
-    await playerToRemove.updateActionRating(-stats.actionRating, -stats.votes);
-    await playerToAdd.updateActionRating(stats.actionRating, stats.votes);
+    //player's action rating
+    //actionrating is alrady averaged no need to adjust votes
+    await playerToRemove.updateActionRating(-stats.actionRating);
+    await playerToAdd.updateActionRating(stats.actionRating);
 
     playerToAdd.markModified('actionRating');
     playerToRemove.markModified('actionRating');
 
+    //unfair tally
     playerToRemove.unfairTally += -stats.unfairTally;
     playerToAdd.unfairTally += stats.unfairTally;
 
+    //player's fights array
     playerToAdd.fights.push(this._id);
     let fightIndex = playerToRemove.fights.indexOf(this._id);
     playerToRemove.fights.splice(fightIndex, 1);
     playerToAdd.markModified('fights');
     playerToRemove.markModified('fights');
-    console.log(playerToRemove.fights);
-    // console.log(fightIndex);
 
+    //change the fights player array
     this.players = [otherPlayer, playersToChange[1]];
-    console.log(this.players);
-
+    
+    //save players
     await playerToRemove.save();
     await playerToAdd.save();
+}
 
+FightSchema.methods.updateTeams = async function(newTeams){
+    //get teams
+    let teamToChange = await Team.findById(newTeams[0]);
+    let teamToAdd = await Team.findById(newTeams[1]);
+
+    // console.log(teamToChange, teamToAdd);
+
+    //remove fight from team.fights array
+    let fightIndex = teamToChange.fights.indexOf(this._id);
+    teamToChange.fights.splice(fightIndex, 1);
+
+    //add fight to team.fights
+    teamToAdd.fights.push(this._id);
+
+    //mark modified and save
+    teamToAdd.markModified('fights');
+    teamToChange.markModified('fights');
+
+    await teamToAdd.save();
+    await teamToChange.save();
+
+    //update this.teams
+    let teamIndex = this.teams.indexOf(newTeams[0]);
+    this.teams[teamIndex] = newTeams[1];
+}
+
+FightSchema.methods.updateSeason = async function(newSeasonId){
+    let currSeason = await Season.findById(this.season);
+
+    let fightIndex = currSeason.fights.indexOf(this._id);
+    currSeason.fights.splice(fightIndex, 1);
+    currSeason.markModified('fights');
+    await currSeason.save();
+
+    let newSeason = await Season.findById(newSeasonId);
+    newSeason.fights.push(this._id);
+    newSeason.markModified('fights');
+    await newSeason.save();
+
+    this.season = newSeason._id;
+}
+
+FightSchema.methods.updateLeague = async function(newLeagueId){
+    let currLeague = await League.findById(this.league);
+
+    let fightIndex = currLeague.fights.indexOf(this._id);
+    currLeague.fights.splice(fightIndex, 1);
+    currLeague.markModified('fights');
+    await currLeague.save();
+
+    let newLeague = await League.findById(newLeagueId);
+    newLeague.fights.push(this._id);
+    newLeague.markModified('fights');
+    await newLeague.save();
+
+    this.league = newLeague._id;
 }
 
 module.exports = mongoose.model('Fight', FightSchema);

@@ -9,7 +9,7 @@ const Season = require('../models/Season');
 const Team = require('../models/Team');
 const Player = require('../models/Player');
 // const User = require('../models/User');
-// const Comment = require('../models/Comment');
+const Comment = require('../models/Comment');
 
 //@desc     Get a fight by ID
 //@route    GET /api/v1/fights/:id
@@ -230,13 +230,42 @@ exports.deleteFight = asyncHandler(async (req, res, next) => {
     });
 });
 
+//@desc     Post a comment to a fight
+//@route    DELETE /api/v1/fights/:id/comments
+//@access   Private - logged in user
+exports.postComment = asyncHandler(async (req, res, next) => {
+    // Make sure there is a comment in the body
+    if(!req.body.comment){
+        return next(new ErrorResponse(`Please add a comment`, 400));
+    }
+    
+    //get fight by params ID
+    let fight = await Fight.findById(req.params.id);
+
+    if(!fight){
+        return next(new ErrorResponse(`Cannot find fight with ID of ${req.params.id}`, 404));
+    }
+
+    //create new comment
+    let comment = await Comment.create(req.body);
+
+    //add comment to fight
+    fight.comments.push(comment._id);
+    fight.markModified('comments');
+    await fight.save();
+
+    sendPopulatedResponse(fight, 200, res);
+});
+
+
 const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
         //populate with data 
     fight = await Fight.findById(fight._id)
         .populate('league', 'name')
         .populate('season', 'season')
         .populate('players', 'firstName lastName')
-        .populate('teams', 'city name');
+        .populate('teams', 'city name')
+        .populate('comments', 'comment createdAt');
 
     res.status(statusCode).json({
         success: true,

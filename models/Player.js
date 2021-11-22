@@ -45,7 +45,7 @@ const PlayerSchema = new mongoose.Schema({
 });
 
 PlayerSchema.methods.updateActionRating = async function(newScore){
-    //new Vites needs to be fixed.
+    
     let currAverage = this.actionRating.average;
     let votes = this.actionRating.votes;
 

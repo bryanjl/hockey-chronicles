@@ -231,7 +231,7 @@ exports.deleteFight = asyncHandler(async (req, res, next) => {
 });
 
 //@desc     Post a comment to a fight
-//@route    DELETE /api/v1/fights/:id/comments
+//@route    POST /api/v1/fights/:id/comments
 //@access   Private - logged in user
 exports.postComment = asyncHandler(async (req, res, next) => {
     // Make sure there is a comment in the body

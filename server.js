@@ -18,6 +18,7 @@ const leagues = require('./routes/league');
 const players = require('./routes/player');
 const seasons = require('./routes/season');
 const teams = require('./routes/team');
+const auth = require('./routes/auth');
 
 //conect to DB
 connectDB();
@@ -49,6 +50,7 @@ app.use('/api/v1/leagues', leagues);
 app.use('/api/v1/players', players);
 app.use('/api/v1/seasons', seasons);
 app.use('/api/v1/teams', teams);
+app.use('/api/v1/auth', auth);
 
 
 //Mount Error handler

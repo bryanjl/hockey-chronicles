@@ -1,14 +1,18 @@
 const mongoose = require('mongoose');
 
 const CommentSchema = new mongoose.Schema({
-    comment: {
+    body: {
         type: String,
         required: [true, 'Please add a comment']
     },
     user: {
-        type: mongoose.Schema.ObjectId
-        // ,
-        // required: [true, 'Please log in to post comment']
+        type: mongoose.Schema.ObjectId,
+        ref: 'User'
+    },
+    parentId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Comment',
+        default: null
     },
     createdAt: {
         type: Date,

@@ -160,11 +160,24 @@ const seedTeams = async(teams) => {
     }
 }
 
+const deletePlayers = async() => {
+    await connectDB();
+
+    try {
+        await Player.deleteMany();
+
+        console.log('Players deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error);
+    }    
+}
+
 if(process.argv[2] === '-seedFights'){
     const fights = JSON.parse(fs.readFileSync(`${__dirname}/_data/fights.json`, 'utf-8'));
     seedFights(fights);
 } else if(process.argv[2] === '-seedPlayers'){
-    const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/players.json`, 'utf-8'));
+    const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHL.json`, 'utf-8'));
     seedPlayers(players);
 } else if(process.argv[2] === '-seedLeagues'){
     const leagues = JSON.parse(fs.readFileSync(`${__dirname}/_data/leagues.json`, 'utf-8'));
@@ -175,6 +188,8 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-seedTeams'){
     const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/teams.json`, 'utf-8'));
     seedTeams(teams);
+} else if(process.argv[2] === '-deletePlayers'){
+    deletePlayers();
 }
 
 

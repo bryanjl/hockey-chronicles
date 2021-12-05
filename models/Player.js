@@ -41,6 +41,9 @@ const PlayerSchema = new mongoose.Schema({
     },
     weight: {
         type: String 
+    },
+    shoots: {
+        type: String
     }
 });
 

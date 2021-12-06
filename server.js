@@ -19,6 +19,7 @@ const players = require('./routes/player');
 const seasons = require('./routes/season');
 const teams = require('./routes/team');
 const auth = require('./routes/auth');
+const cors = require('cors');
 
 //conect to DB
 connectDB();
@@ -35,7 +36,7 @@ if(process.env.NODE_ENV === 'development'){
 // }
 
 //cors -> used in production??
-// app.use(cors());
+app.use(cors());
 
 //body parser
 app.use(express.json());

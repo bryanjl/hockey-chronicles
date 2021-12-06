@@ -31,7 +31,8 @@ const FightSchema = new mongoose.Schema({
         ref: 'Comment'
     },
     description: {
-        type: String
+        type: String,
+        default: ''
     },
     outcome: {
         type: Object

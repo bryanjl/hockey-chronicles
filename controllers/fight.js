@@ -263,7 +263,7 @@ const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
     fight = await Fight.findById(fight._id)
         .populate('league', 'name')
         .populate('season', 'season')
-        .populate('players', 'firstName lastName')
+        .populate('players', 'firstName lastName position wins losses draw height weight shoots')
         .populate('teams', 'city name')
         .populate('comments', 'comment createdAt');
 

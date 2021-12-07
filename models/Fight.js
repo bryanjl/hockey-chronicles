@@ -38,7 +38,8 @@ const FightSchema = new mongoose.Schema({
         type: Object
     },
     videoLink: {
-        type: String
+        type: String,
+        default: ''
     },
     gameType: {
         type: String,

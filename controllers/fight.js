@@ -75,6 +75,7 @@ exports.createFight = asyncHandler(async (req, res, next) => {
     req.body.players.forEach(element => {
         outcome[element._id] = 1;
     });
+    outcome.draw = 1;
     //set outcome object to request body
     req.body.outcome = outcome;
 
@@ -103,6 +104,8 @@ exports.createFight = asyncHandler(async (req, res, next) => {
 //@route    PUT /api/v1/fights/:id
 //@access   Private - logged in user
 exports.updateFight = asyncHandler(async (req, res, next) => {
+    // console.log(req.body);
+
     //get fight by ID
     let fight = await Fight.findById(req.params.id);
     if(!fight){
@@ -110,22 +113,11 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
     }
 
     //outcome update for fight winner
-    //req.body.outcome MUST have player who recieves vote at position 0 index in array
+    //req.body.outcome is the outcome object
     if(req.body.outcome){
-        // console.log(req.body.outcome[0]);
-        // console.log(fight.outcome[req.body.outcome[0]], fight.outcome[req.body.outcome[1]]);
-        if(req.body.outcome.length != 2){
-            return next(new ErrorResponse(`Please have 2 players`, 400));
-        }
-
-        //!!!!This needs to be fixed -> 0 is falsy null is falsy
-            //temp fix set original outcome to 1:1
-        if(!fight.outcome[req.body.outcome[0]] || !fight.outcome[req.body.outcome[1]]){
-            return next(new ErrorResponse(`The players you submitted are not part of this fight`, 400));
-        }
 
         //update fight outcome
-        await fight.updateOutcome(req.body.outcome[0], req.body.outcome[1]);
+        await fight.updateOutcome(req.body.outcome);
 
         //mark modified to save
         fight.markModified('outcome');
@@ -263,7 +255,7 @@ const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
     fight = await Fight.findById(fight._id)
         .populate('league', 'name')
         .populate('season', 'season')
-        .populate('players', 'firstName lastName position wins losses draw height weight shoots')
+        .populate('players', 'firstName lastName position wins losses draws height weight shoots')
         .populate('teams', 'city name')
         .populate('comments', 'comment createdAt');
 

@@ -25,7 +25,7 @@ const PlayerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
-    draw: {
+    draws: {
         type: Number,
         default: 0
     },

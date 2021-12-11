@@ -100,90 +100,127 @@ FightSchema.pre('save', async function(next) {
 });
 
 //update the outcome results based on votes
-FightSchema.methods.updateOutcome = async function(player1, player2) {
-    //player1 gets +1 vote
-    //player2 gets 0 vote
-
-    //check to see current winner before update
-    let currentWinner;
-
-    if(this.outcome[player1] === this.outcome[player2]){
-        currentWinner = "hhh";
-    } else if(this.outcome[player1] > this.outcome[player2]){
-        currentWinner = player1;
-    } else {
-        currentWinner = player2;
-    }
-
-    //update outcome
-    this.outcome[player1] += 1;
-
-    //check to see which player is winner after update
-    let newWinner;
-
-    if(this.outcome[player1] === this.outcome[player2]){
-        newWinner = "hhh";
-
-        //if this is a draw
-        let drawPlayer1 = await Player.findById(player1);
-        let drawPlayer2 = await Player.findById(player2);
-
-        drawPlayer1.draw += 1;
-        if(drawPlayer1.losses > 0){
-            drawPlayer1.losses -= 1;
-        }
-        drawPlayer1.save();
-
-        
-        drawPlayer2.draw += 1;
-        if(drawPlayer2.wins > 0) {
-            drawPlayer2.wins -= 1;
-        }
-        drawPlayer2.save();
-
-        return;
-    } else if(this.outcome[player1] > this.outcome[player2]){
-        newWinner = player1;
-    } else {
-        newWinner = player2;
-    }
-
-    // console.log(currentWinner, newWinner);
-
-    //check if winner outcome has changed
-    if(currentWinner === newWinner){
-        //if currentWinner is equal to newWinner no change needed to player stats
-        // console.log('No change');
-        return;
-    } else {        
-        //if there is a change only player1 can become winner
-        let winningPlayer = await Player.findById(player1);
-        
-        //UPDATE winning player stats
-        winningPlayer.wins += 1;
-        if(winningPlayer.draw > 0){
-            winningPlayer.draw -= 1;
-        }
-        
-        if(winningPlayer.losses > 0){
-            winningPlayer.losses -= 1;
-        }
-        
-        await winningPlayer.save();
-
-        let losingPlayer = await Player.findById(player2);
-
-        //UPDATE losing player stats
-        losingPlayer.losses += 1;
-        if(losingPlayer.draw > 0){
-            losingPlayer.draw -= 1;
-        }
-        
-        if(losingPlayer.wins > 0){
-            losingPlayer.wins -= 1;
+FightSchema.methods.updateOutcome = async function(reqOutcome) {
+    try {
+        //if all values in the reqoutcome object are the same -> do nothing
+        let reqObjVals = Object.values(reqOutcome);
+        if(reqObjVals.every(val => val === reqObjVals[0])){
+            this.outcome = reqOutcome;
+            return;
         }
 
-        await losingPlayer.save();
+        //currOutcomeWinner is the current winner from this.outcome
+        let currOutcomeKeys = Object.keys(this.outcome);
+        let currOutcomeValue = 0;
+        let currOutcomeWinner;
+        for(let i = 0; i < currOutcomeKeys.length; i++){
+            if(this.outcome[currOutcomeKeys[[i]]] > currOutcomeValue) {
+                currOutcomeWinner = currOutcomeKeys[i];
+                currOutcomeValue = this.outcome[currOutcomeKeys[[i]]];
+            }
+        }
+
+        //reqOutcomeWinner is the winner from the request outcome
+        let reqOutcomeKeys = Object.keys(reqOutcome);
+        let reqOutcomeValue = 0;
+        let reqOutcomeWinner;
+        for(let i = 0; i < reqOutcomeKeys.length; i++){
+            if(reqOutcome[reqOutcomeKeys[i]] > reqOutcomeValue){
+                reqOutcomeWinner = reqOutcomeKeys[i];
+                reqOutcomeValue = reqOutcome[reqOutcomeKeys[i]];
+            }
+        }
+
+        //1) same winner as before -> no change
+        if(currOutcomeWinner === reqOutcomeWinner){
+            this.outcome = reqOutcome;
+            return;
+        }
+
+        // 2) draw has most votes previous winnner was a player -> 
+        //prev winner gets -1 wins and +1 draws
+        //prev loser gets -1 losses and +1 draws
+
+        if(reqOutcomeWinner === 'draw' && currOutcomeWinner !== 'draw'){
+            //player1 is the previous winner and recieves -1 wins and +1 draw
+            
+            let player1 = await Player.findById(currOutcomeWinner);
+            if(player1.wins > 0){
+                player1.wins -= 1;
+            }
+            player1.draws += 1;
+            await player1.save();
+
+            //player2 is the previous loser and recieves -1 losses and +1 draw
+
+            const prevLoser = currOutcomeKeys.filter(key => key != 'draw' && key != currOutcomeWinner);
+            let player2 = await Player.findById(prevLoser);
+            if(player2.losses > 0) {
+                player2.losses -= 1;
+            }
+            player2.draws += 1;
+            await player2.save();
+
+            this.outcome = reqOutcome;
+            return;
+        }
+
+        // 3)New player winner from old previous player winner ->
+        //prev winner gets -1 wins and +1 losses
+        //new winner gets +1 wins and -1 losses
+
+        if(reqOutcomeWinner !== 'draw' && currOutcomeWinner !== 'draw'){
+            //player1 is the new winner and receives +1 wins and -1 losses
+
+            let player1 = await Player.findById(reqOutcomeWinner);
+            if(player1.losses > 0){
+                player1.losses -= 1;
+            }
+            player1.wins += 1;
+            await player1.save();
+
+            //player2 is the prev winner and receives -1 wins and +1 losses
+
+            let player2 = await Player.findById(currOutcomeWinner);
+            if(player2.wins > 0) {
+                player2.wins -= 1;
+            }
+            player2.losses += 1;
+            await player2.save();
+
+            this.outcome = reqOutcome;
+            return;
+        }
+
+        //4)new player winner previous was a draw ->
+        //new winner gets +1 win and -1 draws
+        //new loser gets +1 losses and -1 draws
+
+        if(reqOutcomeWinner !== 'draw' && currOutcomeWinner === 'draw'){
+            //player1 is the new winner and receives +1 wins and -1 draws
+
+            let player1 = await Player.findById(reqOutcomeWinner);
+            if(player1.draws > 1){
+                player1.draws -= 1;
+            }
+            player1.wins += 1;
+            await player1.save();
+
+            //player2 is the new loser and recieves +1 losses and -1 draws
+
+            const newLoser = reqOutcomeKeys.filter(key => key != 'draw' && key != reqOutcomeWinner);
+            let player2 = await Player.findById(newLoser);
+            if(player2.draws > 0){
+                player2.draws -= 1;
+            }
+            player2.losses += 1;
+            await player2.save();
+
+            this.outcome = reqOutcome;
+            return;
+        }
+    } catch (error) {
+        console.log(error);
     }
 }
 
@@ -380,4 +417,3 @@ FightSchema.methods.updateLeague = async function(newLeagueId){
 }
 
 module.exports = mongoose.model('Fight', FightSchema);
-

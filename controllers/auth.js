@@ -9,11 +9,11 @@ const asyncHandler = require('../middleware/async');
 //@route    POST /api/v1/auth/register
 //@access   Public
 exports.register = asyncHandler(async (req, res, next) => {
-    const { name, email, password, role } = req.body;
+    const { username, email, password, role } = req.body;
 
     //create User
     const user = await User.create({
-        name,
+        username,
         email,
         password,
         role
@@ -26,15 +26,15 @@ exports.register = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/auth/login
 //@access   Public
 exports.login = asyncHandler(async (req, res, next) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
     //validate the email and password
-    if(!email || !password){
-        return next(new ErrorResponse(`Please provide an email and password`, 400))
+    if(!username || !password){
+        return next(new ErrorResponse(`Please provide an username and password`, 400))
     }
 
     //check for user
-    const user = await User.findOne({ email }).select('+password');
+    const user = await User.findOne({ username }).select('+password');
 
     if(!user) {
         return next(new ErrorResponse(`Invalid Credentials`, 401));
@@ -86,7 +86,7 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 //@access   Private
 exports.updateDetails = asyncHandler(async (req, res, next) => {
     const fieldsToUpdate = {
-        name: req.body.name,
+        username: req.body.username,
         email: req.body.email
     }
 

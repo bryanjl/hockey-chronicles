@@ -5,7 +5,7 @@ const errorHandler = require('./middleware/error');
 //security
 // const mongoSanitize = require('express-mongo-sanitize');
 // const helmet = require('helmet');
-// const cors = require('cors');
+const cors = require('cors');
 
 const connectDB = require('./config/db');
 // const errorHandler = require('./middleware/error');
@@ -13,13 +13,14 @@ const connectDB = require('./config/db');
 dotenv.config({ path: './config/config.env' });
 
 //route files
+const games = require('./routes/game');
 const fights = require('./routes/fight');
 const leagues = require('./routes/league');
 const players = require('./routes/player');
 const seasons = require('./routes/season');
 const teams = require('./routes/team');
 const auth = require('./routes/auth');
-const cors = require('cors');
+
 
 //conect to DB
 connectDB();
@@ -46,6 +47,7 @@ app.use(express.json());
 // app.use(helmet());
 
 //router mounting
+app.use('/api/v1/games', games);
 app.use('/api/v1/fights', fights);
 app.use('/api/v1/leagues', leagues);
 app.use('/api/v1/players', players);

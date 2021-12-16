@@ -6,7 +6,9 @@ const {
     updateFight,
     deleteFight,
     postComment,
-    getComments
+    getComments,
+    deleteComment,
+    updateComment
 } = require('../controllers/fight');
 
 //Model
@@ -30,6 +32,8 @@ router
 router
     .route('/:id/comments')
     .post(postComment)
-    .get(getComments);
+    .get(getComments)
+    .delete(deleteComment)
+    .put(updateComment);
 
 module.exports = router;

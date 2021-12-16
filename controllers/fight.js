@@ -250,6 +250,62 @@ exports.postComment = asyncHandler(async (req, res, next) => {
     sendPopulatedResponse(fight, 200, res);
 });
 
+//@desc     Delete comment from fight
+//@route    DELETE /api/v1/fights/:id/comments
+//@access   Private - logged in user
+exports.deleteComment = asyncHandler(async (req, res, next) => {
+    //get fight by params ID
+    let fight = await Fight.findById(req.params.id);
+
+    if(!fight){
+        return next(new ErrorResponse(`Cannot find fight with ID of ${req.params.id}`, 404));
+    }
+
+    await Comment.findByIdAndDelete(req.body.commentId);
+
+    let updatedComments = fight.comments.filter((comment) => {
+        return comment.toString() !== req.body.commentId
+    })
+
+
+    fight.comments = updatedComments;
+    fight.markModified('comments');
+    await fight.save();
+
+    res.status(200).json({
+        success: true,
+        msg: 'Comment deleted'
+    });
+});
+
+//@desc     Update comment from fight
+//@route    PUT /api/v1/fights/:id/comments
+//@access   Private - logged in user
+exports.updateComment = asyncHandler(async (req, res, next) => {
+    //get fight by params ID
+    // let fight = await Fight.findById(req.params.id);
+
+    // if(!fight){
+    //     return next(new ErrorResponse(`Cannot find fight with ID of ${req.params.id}`, 404));
+    // }
+
+    await Comment.findByIdAndUpdate(req.body.commentId, { body: req.body.body });
+
+    // let updatedComments = fight.comments.filter((comment) => {
+    //     return comment.toString() !== req.body.commentId
+    // })
+
+
+    // fight.comments = updatedComments;
+    // fight.markModified('comments');
+    // await fight.save();
+
+    res.status(200).json({
+        success: true,
+        msg: 'Comment updated'
+    });
+});
+
 //@desc     Get the comments from a fight
 //@route    GET /api/v1/fights/:id/comments
 //@access   Public

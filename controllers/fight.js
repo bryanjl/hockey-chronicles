@@ -226,8 +226,9 @@ exports.deleteFight = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/fights/:id/comments
 //@access   Private - logged in user
 exports.postComment = asyncHandler(async (req, res, next) => {
+    // console.log(req.body);
     // Make sure there is a comment in the body
-    if(!req.body.comment){
+    if(!req.body.body){
         return next(new ErrorResponse(`Please add a comment`, 400));
     }
     
@@ -249,6 +250,26 @@ exports.postComment = asyncHandler(async (req, res, next) => {
     sendPopulatedResponse(fight, 200, res);
 });
 
+//@desc     Get the comments from a fight
+//@route    GET /api/v1/fights/:id/comments
+//@access   Public
+exports.getComments = asyncHandler(async (req, res, next) => {
+     //get fight by params ID
+     let fight = await Fight.findById(req.params.id)
+        .populate('comments', 'body createdAt parentId user username');
+
+     if(!fight){
+         return next(new ErrorResponse(`Cannot find fight with ID of ${req.params.id}`, 404));
+     }
+
+     res
+        .status(200)
+        .json({
+            success: true,
+            data: fight.comments
+        })
+});
+
 
 const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
         //populate with data 
@@ -257,7 +278,7 @@ const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
         .populate('season', 'season')
         .populate('players', 'firstName lastName position wins losses draws height weight shoots')
         .populate('teams', 'city name')
-        .populate('comments', 'comment createdAt');
+        .populate('comments', 'body createdAt parentId user username');
 
     res.status(statusCode).json({
         success: true,

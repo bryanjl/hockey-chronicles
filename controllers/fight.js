@@ -256,7 +256,7 @@ exports.postComment = asyncHandler(async (req, res, next) => {
 exports.getComments = asyncHandler(async (req, res, next) => {
      //get fight by params ID
      let fight = await Fight.findById(req.params.id)
-        .populate('comments', 'body createdAt parentId user username');
+        .populate('comments', 'body createdAt parentId user username userId');
 
      if(!fight){
          return next(new ErrorResponse(`Cannot find fight with ID of ${req.params.id}`, 404));

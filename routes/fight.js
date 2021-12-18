@@ -1,6 +1,7 @@
 const express =  require('express');
 //import controllers
 const {
+    getAllFights,
     getFight,
     createFight,
     updateFight,
@@ -12,15 +13,33 @@ const {
 } = require('../controllers/fight');
 
 //Model
-// const Fight = require('../models/Fight');
+const Fight = require('../models/Fight');
 
 //import middleware
-// const advancedResults = require('../middleware/advancedResults');
+const advancedResults = require('../middleware/advancedResults');
 
 const router = express.Router();
 
 router
     .route('/')
+    .get(advancedResults(Fight, [
+        {
+            path: 'season',
+            select: 'season'
+        },
+        {
+            path: 'teams',
+            select: 'city name'
+        },
+        {
+            path: 'league',
+            select: 'name'
+        },
+        {
+            path: 'players',
+            select: 'firstName lastName'
+        }
+    ], 'date'), getAllFights)
     .post(createFight);
 
 router

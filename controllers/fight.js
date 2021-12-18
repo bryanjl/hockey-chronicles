@@ -11,6 +11,16 @@ const Player = require('../models/Player');
 // const User = require('../models/User');
 const Comment = require('../models/Comment');
 
+
+//@desc     Get all fights
+//@route    GET /api/v1/fights/
+//@access   Public
+exports.getAllFights = asyncHandler(async (req, res, next) => {
+    //use advanced results middleware to paginate and process filtering
+    res.status(200).json(res.advancedResults);
+});
+
+
 //@desc     Get a fight by ID
 //@route    GET /api/v1/fights/:id
 //@access   Public
@@ -282,23 +292,8 @@ exports.deleteComment = asyncHandler(async (req, res, next) => {
 //@route    PUT /api/v1/fights/:id/comments
 //@access   Private - logged in user
 exports.updateComment = asyncHandler(async (req, res, next) => {
-    //get fight by params ID
-    // let fight = await Fight.findById(req.params.id);
-
-    // if(!fight){
-    //     return next(new ErrorResponse(`Cannot find fight with ID of ${req.params.id}`, 404));
-    // }
 
     await Comment.findByIdAndUpdate(req.body.commentId, { body: req.body.body });
-
-    // let updatedComments = fight.comments.filter((comment) => {
-    //     return comment.toString() !== req.body.commentId
-    // })
-
-
-    // fight.comments = updatedComments;
-    // fight.markModified('comments');
-    // await fight.save();
 
     res.status(200).json({
         success: true,

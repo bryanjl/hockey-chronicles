@@ -20,6 +20,7 @@ const players = require('./routes/player');
 const seasons = require('./routes/season');
 const teams = require('./routes/team');
 const auth = require('./routes/auth');
+const search = require('./routes/search');
 
 
 //conect to DB
@@ -54,6 +55,7 @@ app.use('/api/v1/players', players);
 app.use('/api/v1/seasons', seasons);
 app.use('/api/v1/teams', teams);
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/search', search);
 
 
 //Mount Error handler

@@ -3,6 +3,11 @@ const ErrorResponse = require('../utils/ErrorResponse');
 
 //models
 const Game = require('../models/Game');
+const League = require('../models/League');
+const Season = require('../models/Season');
+const Team = require('../models/Team');
+const Player = require('../models/Player');
+const Fight = require('../models/Fight');
 
 
 //@desc     Get all Games
@@ -19,10 +24,74 @@ exports.getAllGames = asyncHandler(async (req, res,next) => {
 //@route    POST /api/v1/games
 //@access   Private
 exports.createGame = asyncHandler(async (req, res,next) => {
+    try {
+        let gameInfo = {};
+    
+    //set date
+    gameInfo.date = new Date(req.body.date);
+
+    //set teams
+    let teams = [];
+    let team1 = await Team.findOne({ city: req.body.teams[0] });
+    let team1Info = {
+        id: team1._id,
+        city: team1.city,
+        name: team1.name
+    }
+    teams.push(team1Info);
+
+    let team2 = await Team.findOne({ city: req.body.teams[1] });
+    let team2Info = {
+        id: team2._id,
+        city: team2.city,
+        name: team2.name
+    }
+    teams.push(team2Info);
+
+    gameInfo.teams = teams
+
+    //set league
+    let leagueInfo = await League.findOne({ name: req.body.league });
+
+    let league = {
+        id: leagueInfo._id,
+        name: leagueInfo.name
+    }
+
+    gameInfo.league = league;
+
+    //set season
+    let seasonInfo = await Season.findOne({ season: req.body.season });
+
+    let season = {
+        id: seasonInfo._id,
+        season: seasonInfo.season
+    }
+
+    gameInfo.season = season;
+
+    //set gameType
+    if(req.body.gameType){
+        gameInfo.gameType = req.body.gameType 
+    }
+    
+    let game = await Game.create(gameInfo);
+
+    if(req.body.fightId){
+        game.fights.push(req.body.fightId);
+        game.markModified('fights');
+        await game.save();
+    }
+
     res.status(200).json({
         success: true,
-        message: 'route for creating a new game'
+        data: game
     });
+    } catch (error) {
+        console.log(error);
+    }
+    
+    
 });
 
 //@desc     Get a game by ID

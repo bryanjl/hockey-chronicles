@@ -2,6 +2,9 @@
 const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/ErrorResponse');
 
+//helper function
+const { createFight } = require('./helpers/createFight');
+
 //models
 const Fight = require('../models/Fight');
 const League = require('../models/League');
@@ -38,74 +41,8 @@ exports.getFight = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/fights/
 //@access   Private - logged in user
 exports.createFight = asyncHandler(async (req, res, next) => { 
-    //get objectID to save for relations 
-    let league = await League.findOne({  name: req.body.league.toUpperCase() }, '_id' );
-    if(!league){
-        return next(new ErrorResponse('League not found', 404));
-    } else {
-        req.body.league = league;
-    }
-
-    let season = await Season.findOne({  season: req.body.season }, '_id');
-    if(!season){
-        return next(new ErrorResponse('Season not found - Check format (YYYY-YYYY)', 404));
-    } else {
-        req.body.season = season;
-    }
-
-    //!!!Test for different number of players/wrong spelling etc
-    //!!How to handle unknow players/fighters???
-    let players = await Player.find({
-        lastName: {
-            $in: req.body.players
-        }
-    }, '_id');
-
-    if(players.length === 0){
-        return next(new ErrorResponse(`No players found`, 404));
-    } else {
-        req.body.players = players;
-    }
-    
-
-    let teams = await Team.find({
-        name: {
-            $in: req.body.teams
-        }
-    }, '_id');
-
-    if(teams.length != 2){
-        return next(new ErrorResponse(`Must have two teams`, 400));
-    } else {
-        req.body.teams = teams;
-    }
-
-    //outcome frequency counter for voting
-    let outcome = {};
-    req.body.players.forEach(element => {
-        outcome[element._id] = 1;
-    });
-    outcome.draw = 1;
-    //set outcome object to request body
-    req.body.outcome = outcome;
-
-    //action rating average - freq counter
-    let actionRating = {
-        average: 0,
-        votes: 0
-    };
-    //set actionRating to request body
-    req.body.actionRating = actionRating;    
-
-    //Date of fight
-    req.body.date = new Date(req.body.date);
-
-    // create fight
-    let fight = await Fight.create(req.body);
-
-    if(!fight){
-        return next(new ErrorResponse(`Unable to create fight - Server Error`, 500));
-    }
+   
+    let fight = await createFight(req);
 
     sendPopulatedResponse(fight, 200, res);
 });
@@ -125,7 +62,6 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
     //outcome update for fight winner
     //req.body.outcome is the outcome object
     if(req.body.outcome){
-
         //update fight outcome
         await fight.updateOutcome(req.body.outcome);
 
@@ -325,10 +261,10 @@ exports.getComments = asyncHandler(async (req, res, next) => {
 const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
         //populate with data 
     fight = await Fight.findById(fight._id)
-        .populate('league', 'name')
-        .populate('season', 'season')
-        .populate('players', 'firstName lastName position wins losses draws height weight shoots')
-        .populate('teams', 'city name')
+        // .populate('league', 'name')
+        // .populate('season', 'season')
+        // .populate('players', 'firstName lastName position wins losses draws height weight shoots')
+        // .populate('teams', 'city name')
         .populate('comments', 'body createdAt parentId user username');
 
     res.status(statusCode).json({

@@ -7,20 +7,16 @@ const Player = require('../models/Player');
 
 const FightSchema = new mongoose.Schema({
     teams: {
-        type: [mongoose.Schema.ObjectId],
-        ref: 'Team'
+        type: [Object]
     },
     players: {
-        type: [mongoose.Schema.ObjectId],
-        ref: 'Player'
+        type: [Object]
     },
     season: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Season'
+        type: Object
     },
     league: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'League'
+        type: Object
     },
     date: {
         type: Date,
@@ -73,25 +69,25 @@ const FightSchema = new mongoose.Schema({
 FightSchema.pre('save', async function(next) {
     if(this.isNew){
         //create reference of fight for season
-        let season = await Season.findById(this.season);
+        let season = await Season.findById(this.season.id);
         season.fights.push(this._id);
         await season.save();
 
         //create reference of fight for league
-        let league = await League.findById(this.league);
+        let league = await League.findById(this.league.id);
         league.fights.push(this._id);
         await league.save();
 
         //create reference of fight for players
         this.players.forEach(async(element) => {
-            let player = await Player.findById(element);
+            let player = await Player.findById(element.id);
             player.fights.push(this._id);
             await player.save();
         });
 
         //create reference of fight for teams
         this.teams.forEach(async(element) => {
-            let team = await Team.findById(element);
+            let team = await Team.findById(element.id);
             team.fights.push(this._id);
             await team.save();
         });
@@ -234,8 +230,8 @@ FightSchema.methods.updateActionRating = async function(newScore) {
     this.actionRating.average = currAverage.toFixed(2);
     this.actionRating.votes += 1;
 
-    let player1 = await Player.findById(this.players[0]);
-    let player2 = await Player.findById(this.players[1]);
+    let player1 = await Player.findById(this.players[0].id);
+    let player2 = await Player.findById(this.players[1].id);
 
     player1.updateActionRating(currAverage);
     player2.updateActionRating(currAverage);
@@ -257,8 +253,8 @@ FightSchema.methods.updateUnfair = async function(newUnfair){
     
     this.unfair = newUnfair;
 
-    let player1 = await Player.findById(this.players[0]);
-    let player2 = await Player.findById(this.players[1]);
+    let player1 = await Player.findById(this.players[0].id);
+    let player2 = await Player.findById(this.players[1].id);
 
     if(newUnfair){
         player1.unfairTally += 1;
@@ -276,6 +272,7 @@ FightSchema.methods.updateUnfair = async function(newUnfair){
     await player2.save();
 }
 
+//THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING PLAYERS
 FightSchema.methods.updatePlayers = async function(playersToChange){
     //get player that isn't changing
     let playersArr = this.players;
@@ -358,6 +355,7 @@ FightSchema.methods.updatePlayers = async function(playersToChange){
     await playerToAdd.save();
 }
 
+//THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING TEAMS
 FightSchema.methods.updateTeams = async function(newTeams){
     //get teams
     let teamToChange = await Team.findById(newTeams[0]);
@@ -384,6 +382,7 @@ FightSchema.methods.updateTeams = async function(newTeams){
     this.teams[teamIndex] = newTeams[1];
 }
 
+//THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING SEASON
 FightSchema.methods.updateSeason = async function(newSeasonId){
     let currSeason = await Season.findById(this.season);
 
@@ -400,6 +399,7 @@ FightSchema.methods.updateSeason = async function(newSeasonId){
     this.season = newSeason._id;
 }
 
+//THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING LEAGUE
 FightSchema.methods.updateLeague = async function(newLeagueId){
     let currLeague = await League.findById(this.league);
 

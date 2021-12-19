@@ -10,13 +10,14 @@ const {
 } = require('../controllers/game');
 
 //import middleware
+const { fightCreate } = require('../middleware/fightCreate');
 
 const router = express.Router();
 
 router 
     .route('/')
     .get(getAllGames)
-    .post(createGame);
+    .post(fightCreate, createGame);
 
 router
     .route('/:id')

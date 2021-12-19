@@ -14,21 +14,19 @@ const GameSchema = new mongoose.Schema({
         ref: 'Fight'
     },
     league: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'League'
+        type: Object
     },
     season: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Season'
+        type: Object
     },
     teams: {
-        type: [mongoose.Schema.ObjectId],
-        ref: 'Team'
+        type: [Object]
     },
     comments: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Comment'
     }
 });
+
 
 module.exports = mongoose.model('Game', GameSchema);

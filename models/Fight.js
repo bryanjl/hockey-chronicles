@@ -44,7 +44,7 @@ const FightSchema = new mongoose.Schema({
     },
     fightType: {
         type: String,
-        enum: ['Rough', 'Cheap', 'Brawl', 'Refused', 'Hit', 'Fight'],
+        enum: ['Rough', 'Cheap', 'Brawl', 'Refused', 'Hit', 'Fight', 'Almost', 'Event'],
         default: 'Fight'
     },
     actionRating: {

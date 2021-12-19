@@ -14,94 +14,92 @@ const Fight = require('../models/Fight');
 //@route    GET /api/v1/games
 //@access   Public
 exports.getAllGames = asyncHandler(async (req, res,next) => {
-    res.status(200).json({
-        success: true,
-        message: 'route for getting all games'
-    });
+    res.status(200).json(res.advancedResults);
 });
 
 //@desc     Create a new game
 //@route    POST /api/v1/games
 //@access   Private
-exports.createGame = asyncHandler(async (req, res,next) => {
+exports.createGame = asyncHandler(async (req, res, next) => {
     try {
         let gameInfo = {};
     
-    //set date
-    gameInfo.date = new Date(req.body.date);
+        //set date
+        gameInfo.date = new Date(req.body.date);
 
-    //set teams
-    let teams = [];
-    let team1 = await Team.findOne({ city: req.body.teams[0] });
-    let team1Info = {
-        id: team1._id,
-        city: team1.city,
-        name: team1.name
-    }
-    teams.push(team1Info);
+        //set teams
+        let teams = [];
+        let team1 = await Team.findOne({ city: req.body.teams[0] });
+        let team1Info = {
+            id: team1._id,
+            city: team1.city,
+            name: team1.name
+        }
+        teams.push(team1Info);
 
-    let team2 = await Team.findOne({ city: req.body.teams[1] });
-    let team2Info = {
-        id: team2._id,
-        city: team2.city,
-        name: team2.name
-    }
-    teams.push(team2Info);
+        let team2 = await Team.findOne({ city: req.body.teams[1] });
+        let team2Info = {
+            id: team2._id,
+            city: team2.city,
+            name: team2.name
+        }
+        teams.push(team2Info);
 
-    gameInfo.teams = teams
+        gameInfo.teams = teams
 
-    //set league
-    let leagueInfo = await League.findOne({ name: req.body.league });
+        //set league
+        let leagueInfo = await League.findOne({ name: req.body.league });
 
-    let league = {
-        id: leagueInfo._id,
-        name: leagueInfo.name
-    }
+        let league = {
+            id: leagueInfo._id,
+            name: leagueInfo.name
+        }
 
-    gameInfo.league = league;
+        gameInfo.league = league;
 
-    //set season
-    let seasonInfo = await Season.findOne({ season: req.body.season });
+        //set season
+        let seasonInfo = await Season.findOne({ season: req.body.season });
 
-    let season = {
-        id: seasonInfo._id,
-        season: seasonInfo.season
-    }
+        let season = {
+            id: seasonInfo._id,
+            season: seasonInfo.season
+        }
 
-    gameInfo.season = season;
+        gameInfo.season = season;
 
-    //set gameType
-    if(req.body.gameType){
-        gameInfo.gameType = req.body.gameType 
-    }
-    
-    let game = await Game.create(gameInfo);
+        //set gameType
+        if(req.body.gameType){
+            gameInfo.gameType = req.body.gameType 
+        }
+        
+        let game = await Game.create(gameInfo);
 
-    if(req.body.fightId){
-        game.fights.push(req.body.fightId);
-        game.markModified('fights');
-        await game.save();
-    }
+        if(req.body.fightId){
+            game.fights.push(req.body.fightId);
+            game.markModified('fights');
+            await game.save();
+        }
 
-    res.status(200).json({
-        success: true,
-        data: game
-    });
+        res.status(200).json({
+            success: true,
+            data: game
+        });
     } catch (error) {
         console.log(error);
     }
-    
-    
 });
 
 //@desc     Get a game by ID
 //@route    GET /api/v1/games/:id
 //@access   Public
 exports.getGame = asyncHandler(async (req, res,next) => {
-    res.status(200).json({
-        success: true,
-        message: 'route for getting game by ID'
-    });
+    //find game by ID
+    let game = await Game.findById(req.params.id);
+    if(!game){
+        return next(new ErrorResponse(`Cannot find game with ID of ${req.params.id}`, 404));
+    }
+
+    sendPopulatedResponse(game, 200, res);
 });
 
 //@desc     Update a game by ID
@@ -118,6 +116,9 @@ exports.updateGame = asyncHandler(async (req, res,next) => {
 //@route    DELETE /api/v1/games/:id
 //@access   Private
 exports.deleteGame = asyncHandler(async (req, res,next) => {
+    //!!!Should not be deleting games!!!
+    //No function yet
+    
     res.status(200).json({
         success: true,
         message: 'route for deleting a game by ID'
@@ -128,20 +129,34 @@ exports.deleteGame = asyncHandler(async (req, res,next) => {
 //@route    POST /api/v1/games/:id/comments
 //@access   Private - logged in user
 exports.postComment = asyncHandler(async (req, res,next) => {
-    res.status(200).json({
-        success: true,
-        message: 'route for posting a comment to a game'
-    });
+    if(!req.body.body){
+        return next(new ErrorResponse(`Please add a comment`, 400));
+    }
+    
+    let game = await Game.findById(req.params.id);
+
+    if(!game){
+        return next(new ErrorResponse(`Game with id of ${req.params.id} not found`, 404));
+    }
+
+    let comment = await Comment.create(req.body);
+
+    //add comment to the game
+    game.comments.push(comment._id);
+    game.marModified('comments');
+    await game.save();
+
+    sendPopulatedResponse(game, 200, res);
 });
 
 const sendPopulatedResponse = asyncHandler(async (game, statusCode, res) => {
     //populate with data 
 game = await Game.findById(game._id)
     .populate('fights', 'players outcome fightType actionRating unfair')
-    .populate('league', 'name')
-    .populate('season', 'season')
-    .populate('teams', 'city name')
-    .populate('comments', 'comment createdAt');
+    // .populate('league', 'name')
+    // .populate('season', 'season')
+    // .populate('teams', 'city name')
+    .populate('comments', 'body createdAt parentId user username');
 
 res.status(statusCode).json({
     success: true,

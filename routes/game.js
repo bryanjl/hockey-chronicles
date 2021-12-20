@@ -17,7 +17,7 @@ const router = express.Router();
 
 router 
     .route('/')
-    .get(advancedResults, getAllGames)
+    .get(getAllGames)
     .post(fightCreate, createGame);
 
 router

@@ -78,6 +78,11 @@ exports.createGame = asyncHandler(async (req, res, next) => {
             game.fights.push(req.body.fightId);
             game.markModified('fights');
             await game.save();
+
+            let fight = await Fight.findById(req.body.fightId);
+            fight.game = game._id;
+            fight.markModified('game');
+            await fight.save();
         }
 
         res.status(200).json({

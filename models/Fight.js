@@ -6,6 +6,10 @@ const Team = require('../models/Team');
 const Player = require('../models/Player');
 
 const FightSchema = new mongoose.Schema({
+    game: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Game'
+    },
     teams: {
         type: [Object]
     },

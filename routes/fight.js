@@ -17,6 +17,7 @@ const Fight = require('../models/Fight');
 
 //import middleware
 const advancedResults = require('../middleware/advancedResults');
+const { updatePlayerData } = require('../middleware/updatePlayerData');
 
 const router = express.Router();
 
@@ -44,7 +45,7 @@ router
 
 router
     .route('/:id')
-    .get(getFight)
+    .get(updatePlayerData, getFight)
     .put(updateFight)
     .delete(deleteFight);
 

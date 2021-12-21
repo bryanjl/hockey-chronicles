@@ -34,7 +34,12 @@ exports.createTeam = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`League ${req.body.league} Not found`, 400));
     }
 
-    req.body.league = league._id;
+    req.body.league = {
+        id: league._id,
+        name: league.name
+    }
+
+    // req.body.fullName = `${req.body.city} ${req.body.name}`;
     
     let team = await Team.create(req.body);
 
@@ -54,7 +59,21 @@ exports.updateTeam = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Cannot update team fights`, 400));
     }
 
-    team = await Team.findByIdAndUpdate(req.params.id, req.body);
+    if(req.body.league){
+        let league = League.findOne({ name: req.body.league });
+        if(!league) {
+            return next(new ErrorResponse(`Cannot find league with name ${req.body.league}`, 404));
+        }
+        req.body.league = {
+            id: league._id,
+            name: league.name
+        }
+    }
+    
+    team = await Team.findByIdAndUpdate(req.params.id, req.body, {new: true});
+
+    //trigger the pre save hook to update fullName
+    await team.save();
 
     sendPopulatedResponse(team, 200, res);
 });

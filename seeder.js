@@ -449,7 +449,10 @@ const seedTeams = async(teams) => {
 
             let league = await League.findOne({ name: team.league });
 
-            team.league = league._id;
+            team.league = {
+                id: league._id,
+                name: league.name
+            }
 
             await Team.create(team);
 
@@ -459,6 +462,17 @@ const seedTeams = async(teams) => {
         process.exit();
     } catch (error) {
         console.log(error);
+    }
+}
+
+const deleteTeams = async() => {
+    await connectDB();
+    try {
+        await Team.deleteMany();
+        console.log('teams deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error)
     }
 }
 
@@ -488,8 +502,10 @@ if(process.argv[2] === '-seedFights'){
     const seasons = JSON.parse(fs.readFileSync(`${__dirname}/_data/seasons.json`, 'utf-8'));
     seedSeasons(seasons);
 } else if(process.argv[2] === '-seedTeams'){
-    const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/teams.json`, 'utf-8'));
+    const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHLteams.json`, 'utf-8'));
     seedTeams(teams);
+} else if(process.argv[2] === '-deleteTeams'){
+    deleteTeams();
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){

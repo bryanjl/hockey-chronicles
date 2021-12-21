@@ -1,5 +1,5 @@
 const asyncHandler = require('./async');
-const ErrorResponse = require('../utils/ErrorResponse');
+// const ErrorResponse = require('../utils/ErrorResponse');
 
 //models
 const Fight = require('../models/Fight');

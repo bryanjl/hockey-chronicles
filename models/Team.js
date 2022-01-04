@@ -26,15 +26,4 @@ TeamSchema.pre('save', async function(next) {
     next();
 });
 
-TeamSchema.pre('validate', async function(next) {
-    console.log(this.city, this.name)
-    this.fullName = `${this.city} ${this.name}`;
-    // next();
-});
-
-TeamSchema.methods.setFullName = (city, name) => {
-    console.log(this.city, this.name);
-    this.fullName = `${city} ${name}`;
-}
-
 module.exports = mongoose.model('Team', TeamSchema);

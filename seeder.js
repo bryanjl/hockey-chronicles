@@ -509,6 +509,6 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/testGameData.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_60-61.json`, 'utf-8'));
     seedGames(games);
 }

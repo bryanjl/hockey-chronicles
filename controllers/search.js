@@ -21,17 +21,42 @@ exports.searchFights = asyncHandler(async (req, res, next) => {
                     query: `${req.query.term}`,
                     path: {
                         wildcard: `${req.query.path}*`
-                    },
-                    fuzzy: {}
+                    }
+                    // ,
+                    // fuzzy: {}
                 }
             }
         },
         {
+            $skip: 25 * (req.query.page - 1)
+        },
+        {
             $limit : 25
         }
+    ]).sort({ "date": 1 });
+
+    let count = await Fight.aggregate([
+        {
+            $search: {
+                index: "fights",
+                text: {
+                    query: `${req.query.term}`,
+                    path: {
+                        wildcard: `${req.query.path}*`
+                    }
+                    // ,
+                    // fuzzy: {}
+                }
+            }
+        },
+        {
+            $count : "count"
+        }
     ]);
+
     res.status(200).json({
         success: true,
+        count: count[0].count,
         data: result
     });
 });

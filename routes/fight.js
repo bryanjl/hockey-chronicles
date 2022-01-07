@@ -23,24 +23,7 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(advancedResults(Fight, [
-        {
-            path: 'season',
-            select: 'season'
-        },
-        {
-            path: 'teams',
-            select: 'city name'
-        },
-        {
-            path: 'league',
-            select: 'name'
-        },
-        {
-            path: 'players',
-            select: 'firstName lastName'
-        }
-    ], 'date'), getAllFights)
+    .get(advancedResults(Fight, 'date', 'fights'), getAllFights)
     .post(createFight);
 
 router

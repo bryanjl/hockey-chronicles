@@ -18,7 +18,7 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(advancedResults(Season, {
+    .get(advancedResults(Season, 'season', 'seasons', {
         path: 'fights', 
         populate: [
             { 
@@ -38,7 +38,7 @@ router
                 path: 'season',
                 select: 'season'
             }
-        ]}, 'season'), getAllSeasons)
+        ]}), getAllSeasons)
     .post(createSeason);
 
 router

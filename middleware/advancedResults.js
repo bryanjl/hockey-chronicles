@@ -135,20 +135,6 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
 
     //push the limit, sort and skip to the query
     query = query.concat([
-        // {$lookup: {
-        //     from: "Fight",
-        //     let: {fightId: "$fights"},
-        //     pipeline: [
-        //         {
-        //             $match: {
-        //                 $expr: {
-        //                     $in: [ "$_id", "$$fightId" ]
-        //                 }
-        //             }
-        //         }]
-        //     ,
-        //     as: "figs"
-        // }},
         sort,
         {$skip: startIndex},
         {$limit: limit}
@@ -158,6 +144,13 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
     
     // get query results with limit
     result = await model.aggregate(query);
+
+    // console.log('here', populate);
+
+    if(populate !== ''){
+        await model.populate(result, {path: populate});
+    }
+    
 
     //save to res object to be used in controller
     res.advancedResults = {

@@ -157,7 +157,7 @@ exports.postComment = asyncHandler(async (req, res,next) => {
 const sendPopulatedResponse = asyncHandler(async (game, statusCode, res) => {
     //populate with data 
 game = await Game.findById(game._id)
-    .populate('fights', 'players outcome fightType actionRating unfair')
+    .populate('fights', 'players outcome fightType actionRating unfair description')
     // .populate('league', 'name')
     // .populate('season', 'season')
     // .populate('teams', 'city name')

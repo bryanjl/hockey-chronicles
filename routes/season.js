@@ -18,27 +18,7 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(advancedResults(Season, 'season', 'seasons', {
-        path: 'fights', 
-        populate: [
-            { 
-                path: 'teams', 
-                select: 'name city'
-            },
-            {
-                path: 'players',
-                select: 'lastName firstName'
-                
-            },
-            {
-                path: 'league',
-                select: 'name'
-            },
-            {
-                path: 'season',
-                select: 'season'
-            }
-        ]}), getAllSeasons)
+    .get(advancedResults(Season, 'season', 'seasons', 'fights'), getAllSeasons)
     .post(createSeason);
 
 router

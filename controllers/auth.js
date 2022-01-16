@@ -205,11 +205,15 @@ const sendTokenResponse = (user, statusCode, res) => {
         options.secure = true;
     }
 
+    let userObj = user.toObject();
+    delete userObj.password;
+
     res
     .status(statusCode)
     .cookie('token', token, options)
     .json({
         success: true,
+        user: userObj,
         token
     });
 }

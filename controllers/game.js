@@ -8,6 +8,7 @@ const Season = require('../models/Season');
 const Team = require('../models/Team');
 const Player = require('../models/Player');
 const Fight = require('../models/Fight');
+const Comment = require('../models/Comment');
 
 
 //@desc     Get all Games
@@ -133,7 +134,8 @@ exports.deleteGame = asyncHandler(async (req, res,next) => {
 //@desc     Post a comment to a game using ID
 //@route    POST /api/v1/games/:id/comments
 //@access   Private - logged in user
-exports.postComment = asyncHandler(async (req, res,next) => {
+exports.postComment = asyncHandler(async (req, res, next) => {
+    console.log(req.body);
     if(!req.body.body){
         return next(new ErrorResponse(`Please add a comment`, 400));
     }
@@ -148,7 +150,7 @@ exports.postComment = asyncHandler(async (req, res,next) => {
 
     //add comment to the game
     game.comments.push(comment._id);
-    game.marModified('comments');
+    game.markModified('comments');
     await game.save();
 
     sendPopulatedResponse(game, 200, res);

@@ -15,8 +15,11 @@ const errorHandler = (err, req, res, next) => {
 
     //Mongoose duplicate value in field
     if(err.code === 11000){
+        
+        // console.log(error.formField);
         let message = `Cannot use duplicate values in field`;
         error = new ErrorResponse(message, 400);
+        error.formField = Object.keys(err.keyPattern)[0];
     }
 
     //mongoose validation errors
@@ -30,7 +33,8 @@ const errorHandler = (err, req, res, next) => {
         .status(error.statusCode || 500)
         .json({
             success: false,
-            msg: error.message || 'Server Error'
+            msg: error.message || 'Server Error',
+            formField: error.formField
         });
 }
 

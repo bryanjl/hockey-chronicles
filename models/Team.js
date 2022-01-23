@@ -18,6 +18,10 @@ const TeamSchema = new mongoose.Schema({
     fights: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Fight'
+    },
+    games: {
+        type: [mongoose.Schema.ObjectId],
+        ref: 'Game'
     }
 });
 

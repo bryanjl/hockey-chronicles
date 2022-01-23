@@ -86,6 +86,17 @@ const seedGames = async(gameData) => {
             
             let game = await Game.create(gameInfo);
 
+            if(game) {
+                team1.games.push(game._id);
+                team2.games.push(game._id);
+
+                team1.markModified('games');
+                team2.markModified('games');
+
+                await team1.save();
+                await team2.save();
+            }
+
             return game;
 
         } catch (error) {
@@ -509,6 +520,6 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_60-61.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_94_95.json`, 'utf-8'));
     seedGames(games);
 }

@@ -160,9 +160,6 @@ const sendPopulatedResponse = asyncHandler(async (game, statusCode, res) => {
     //populate with data 
 game = await Game.findById(game._id)
     .populate('fights', 'players outcome fightType actionRating unfair description')
-    // .populate('league', 'name')
-    // .populate('season', 'season')
-    // .populate('teams', 'city name')
     .populate('comments', 'body createdAt parentId user username');
 
 res.status(statusCode).json({

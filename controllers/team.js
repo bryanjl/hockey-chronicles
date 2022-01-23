@@ -124,6 +124,10 @@ const sendPopulatedResponse = asyncHandler(async function (team, statusCode, res
                         select: 'season'
                     }
                 ]
+            },
+            {
+                path: 'games',
+                select: 'date gameType league season teams'
             }
         ]);
 

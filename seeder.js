@@ -12,13 +12,7 @@ const Season = require('./models/Season');
 const League = require('./models/League');
 const Team = require('./models/Team');
 const Game = require('./models/Game');
-
-//data
-// const fights = JSON.parse(fs.readFileSync(`${__dirname}/_data/fights.json`, 'utf-8'));
-// const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/players.json`, 'utf-8'));
-// const seasons = JSON.parse(fs.readFileSync(`${__dirname}/_data/seasons.json`, 'utf-8'));
-// const leagues = JSON.parse(fs.readFileSync(`${__dirname}/_data/leagues.json`, 'utf-8'));
-// const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/teams.json`, 'utf-8'));
+const Comment = require('./models/Comment');
 
 //connect the DB
 const connectDB = async() => {
@@ -33,52 +27,67 @@ const connectDB = async() => {
 const seedGames = async(gameData) => {
     await connectDB();
 
-    const createGame = async(data) => {
+    const getInfo = async(data) => {
+        let info = {};
+
+        //set date
+        info.date = new Date(data.date);
+
+        
+        
+        //set teams
+        let teams = [];
+        let team1 = await Team.findOne({ city: data.teams[0] });
+        let team1Info = {
+            id: team1._id,
+            city: team1.city,
+            name: team1.name
+        }
+        teams.push(team1Info);
+
+        let team2 = await Team.findOne({ city: data.teams[1] });
+        let team2Info = {
+            id: team2._id,
+            city: team2.city,
+            name: team2.name
+        }
+        teams.push(team2Info);
+
+        info.teams = teams;
+
+
+        //league info
+        //get objectID to save for relations 
+        let leagueId = await League.findOne({  name: data.league.toUpperCase() });
+        
+        info.league = {
+            id: leagueId._id,
+            league: leagueId.name
+        }
+
+
+        //Season Info
+        //set season
+        let seasonInfo = await Season.findOne({ season: data.season });
+
+        info.season = {
+            id: seasonInfo._id,
+            season: seasonInfo.season
+        }
+
+        // console.log(info)
+
+        info.team1 = team1;
+        info.team2 = team2;
+        info.seasonInfo = seasonInfo;
+
+        // console.log(info);
+
+        return info;
+    }
+
+    const createGame = async(data, gameInfo) => {
         try {
-            let gameInfo = {};
-
-            gameInfo.date = new Date(data.date);
-
-            //set teams
-            let teams = [];
-            let team1 = await Team.findOne({ city: data.teams[0] });
-            let team1Info = {
-                id: team1._id,
-                city: team1.city,
-                name: team1.name
-            }
-            teams.push(team1Info);
-
-            let team2 = await Team.findOne({ city: data.teams[1] });
-            let team2Info = {
-                id: team2._id,
-                city: team2.city,
-                name: team2.name
-            }
-            teams.push(team2Info);
-
-            gameInfo.teams = teams
-
-            //set league
-            let leagueInfo = await League.findOne({ name: data.league });
-
-            let league = {
-                id: leagueInfo._id,
-                name: leagueInfo.name
-            }
-
-            gameInfo.league = league;
-
-            //set season
-            let seasonInfo = await Season.findOne({ season: data.season });
-
-            let season = {
-                id: seasonInfo._id,
-                season: seasonInfo.season
-            }
-
-            gameInfo.season = season;
-
             //set gameType
             if(data.gameType){
                 gameInfo.gameType = data.gameType 
@@ -87,14 +96,18 @@ const seedGames = async(gameData) => {
             let game = await Game.create(gameInfo);
 
             if(game) {
-                team1.games.push(game._id);
-                team2.games.push(game._id);
+                gameInfo.team1.games.push(game._id);
+                gameInfo.team2.games.push(game._id);
+                gameInfo.seasonInfo.games.push(game._id);
+                
 
-                team1.markModified('games');
-                team2.markModified('games');
+                gameInfo.team1.markModified('games');
+                gameInfo.team2.markModified('games');
+                gameInfo.seasonInfo.markModified('games');
 
-                await team1.save();
-                await team2.save();
+                await gameInfo.team1.save();
+                await gameInfo.team2.save();
+                await gameInfo.seasonInfo.save();
             }
 
             return game;
@@ -106,54 +119,21 @@ const seedGames = async(gameData) => {
         }
     }
 
-    const createFight = async(data) => {
+    const createFight = async(data, fightInfo) => {
         try {
-            //if there are no players in the request skip creating the fight
-            let fightInfo = {};
 
             if(data.players.length === 3) {
                 fightInfo.fightType = data.players.pop();
             }
-            // console.log(fightInfo, data.players);
 
             if(data.players.length === 1) {
                 fightInfo.fightType = 'Event';
-                fightInfo.description = data.players[0];
+                fightInfo.eventDescription = data.players[0];
             }
 
-            //get objectID to save for relations 
-            let leagueId = await League.findOne({  name: data.league.toUpperCase() });
-            
-            fightInfo.league = {
-                id: leagueId._id,
-                league: leagueId.name
-            }
-            
 
-            let seasonId = await Season.findOne({  season: data.season });
-            
-            fightInfo.season = {
-                id: seasonId._id,
-                season: seasonId.season
-            }
-            
             //if this an event we don't need players
             if(data.players.length > 1){
-                 //!!!Test for different number of players/wrong spelling etc
-                //!!How to handle unknow players/fighters???
-                let playersId = [];
-                for(let k = 0; k < data.players.length; k++){
-                    let playerInfo = await Player.findOne({
-                        lastName: {
-                            $in: data.players[k]
-                        }
-                    }, '_id');
-                    playersId.push(playerInfo);
-                }
-                
-                
-
-                // console.log(playersId);
                 
                 let players = [];
 
@@ -161,7 +141,9 @@ const seedGames = async(gameData) => {
 
                 // console.log('made it here', playersId)
                 
-                let player1 = await Player.findById(playersId[0]._id);
+                let player1 = await Player.findOne({ lastName: data.players[0] })
+
+                // let player1 = await Player.findById(playersId[0]._id);
                 let player1Info = {
                     id: player1._id,
                     firstName: player1.firstName,
@@ -178,8 +160,8 @@ const seedGames = async(gameData) => {
             
             
             
-
-                let player2 = await Player.findById(playersId[1]._id);
+                let player2 = await Player.findOne({ lastName: data.players[1] })
+                // let player2 = await Player.findById(playersId[1]._id);
                 let player2Info = {
                     id: player2._id,
                     firstName: player2.firstName,
@@ -193,47 +175,10 @@ const seedGames = async(gameData) => {
                     shoots: player2.shoots
                 }
                 players.push(player2Info);
-                
-
-                // console.log(players)
 
                 fightInfo.players = players;
             }
 
-           
-            
-            
-
-            let teamsId = await Team.find({
-                city: {
-                    $in: data.teams
-                }
-            }, '_id');
-
-            // console.log(teams);
-
-            
-            //embed teams to fight document
-            let teams = [];
-            let team1 = await Team.findById(teamsId[0]._id);
-            let  team1Info = {
-                id: team1._id,
-                name: team1.name,
-                city: team1.city
-            }
-            teams.push(team1Info);
-            let team2 = await Team.findById(teamsId[1]._id);
-            let team2Info = {
-                id: team2._id,
-                name: team2.name,
-                city: team2.city
-            }
-            teams.push(team2Info);
-
-            // console.log(teams)
-
-            fightInfo.teams = teams;
-            
 
             // if this is an event don't need outcome
             if (data.players.length > 1) {
@@ -258,7 +203,7 @@ const seedGames = async(gameData) => {
             fightInfo.actionRating = actionRating;    
 
             //Date of fight
-            fightInfo.date = new Date(data.date);
+            // fightInfo.date = new Date(data.date);
 
             // create fight
             let fight = await Fight.create(fightInfo);
@@ -273,9 +218,12 @@ const seedGames = async(gameData) => {
 
     for(let i = 0; i < gameData.length; i++){
         console.log(`game ${i+1} of ${gameData.length} seeded`)
+        // console.log(await getInfo(gameData[i]));
+        let info = await getInfo(gameData[i]);
         //if players array is empty then create game with no fights
-        if(gameData[i].players.length === 0){
-            let game = await createGame(gameData[i]);
+        if(gameData[i].players.length === 1 && gameData[i].players[0] === ""){
+            // console.log('here');
+            let game = await createGame(gameData[i], info);
 
             if(game === 'error'){
                 console.log(`ERROR at ${gameData[i]}`);
@@ -292,7 +240,7 @@ const seedGames = async(gameData) => {
             for(let j = 0; j < gameData[i].players.length; j++) {
                 let fightData = {...gameData[i]};
                 fightData.players = gameData[i].players[j];
-                let returnedFight = await createFight(fightData);
+                let returnedFight = await createFight(fightData, info);
                 if (returnedFight === 'error') {
                     console.log(`ERROR at ${fightData}`);
                     continue;
@@ -300,14 +248,16 @@ const seedGames = async(gameData) => {
                 createdFights.push(returnedFight._id);
             }
             //keep fight._id to add to array for game
-            
-            let game = await createGame(gameData[i]);
+
+            let game = await createGame(gameData[i], info);
+            // console.log(game);
             if(game === 'error'){
                 console.log(`ERROR at ${gameData[i]}`);
                 continue;
             }
             // console.log(game);
             // console.log(createdFights);
+
             game.fights = createdFights;
             game.markModified('fights');
             await game.save();
@@ -324,10 +274,10 @@ const seedGames = async(gameData) => {
         else if(!Array.isArray(gameData[i].players[0])){
             let createdFight = [];
             
-            let fight = await createFight(gameData[i]);
+            let fight = await createFight(gameData[i], info);
             createdFight.push(fight._id);
 
-            let game = await createGame(gameData[i]);
+            let game = await createGame(gameData[i], info);
 
             fight.game = game._id;
             fight.markModified('game');
@@ -406,6 +356,10 @@ const seedPlayers = async(players) => {
                 votes: 0
             };
             player.actionRating = actionRating;
+
+            if(player.shoots !== 'L' || player.shoots !== 'R'){
+                player.shoots = '';
+            }
             
             await Player.create(player);
             console.log(`Player ${i} of ${players.length} seeded`);
@@ -500,6 +454,45 @@ const deletePlayers = async() => {
     }    
 }
 
+const deleteGames = async() => {
+    await connectDB();
+
+    try {
+        await Game.deleteMany();
+
+        console.log('Games deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error);
+    }    
+}
+
+const deleteFights = async() => {
+    await connectDB();
+
+    try {
+        await Fight.deleteMany();
+
+        console.log('Fights deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error);
+    }    
+}
+
+const deleteComments = async() => {
+    await connectDB();
+
+    try {
+        await Comment.deleteMany();
+
+        console.log('Comments deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error);
+    }  
+}
+
 if(process.argv[2] === '-seedFights'){
     const fights = JSON.parse(fs.readFileSync(`${__dirname}/_data/fights.json`, 'utf-8'));
     seedFights(fights);
@@ -520,6 +513,12 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_94_95.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_60-61.json`, 'utf-8'));
     seedGames(games);
+} else if(process.argv[2] === '-deleteGames'){
+    deleteGames();
+} else if(process.argv[2] === '-deleteFights') {
+    deleteFights();
+} else if(process.argv[2] === '-deleteComments') {
+    deleteComments();
 }

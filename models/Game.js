@@ -6,8 +6,11 @@ const GameSchema = new mongoose.Schema({
     },
     gameType: {
         type: String,
-        enum: ['Regular', 'Round 1', 'Preseason', 'Quarter Final', 'Semi Final', 'Final'],
         default: 'Regular'
+    },
+    round: {
+        type: String,
+        default: ''
     },
     fights: {
         type: [mongoose.Schema.ObjectId],

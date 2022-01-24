@@ -34,6 +34,10 @@ const FightSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    eventDescription: {
+        type: String,
+        default: ''
+    },
     outcome: {
         type: Object
     },

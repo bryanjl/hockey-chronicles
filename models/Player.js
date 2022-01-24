@@ -9,6 +9,9 @@ const PlayerSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please add player's last name"]
     },
+    nickname: {
+        type: String
+    },
     position: {
         type: String,
         default: 'N/A'

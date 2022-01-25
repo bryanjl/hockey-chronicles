@@ -108,8 +108,6 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
                         path: {
                             wildcard: `${req.query.path || ''}*`
                         }
-                        // ,
-                        // fuzzy: {}
                     }
                 }
             },

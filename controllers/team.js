@@ -10,7 +10,7 @@ const Team = require('../models/Team');
 //@access   Public
 exports.getAllTeams = asyncHandler(async (req, res, next) => {
     //use advanced results middleware
-    res.status(200).json(res.advancedResults);
+    res.status(200).json(res.simpleSearch);
 });
 
 //@desc     Get a team by ID

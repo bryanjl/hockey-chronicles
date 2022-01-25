@@ -6,7 +6,15 @@ const ErrorResponse = require('../utils/ErrorResponse');
 //@route    GET /api/v1/seasons/
 //@access   Public
 exports.getAllSeasons = asyncHandler(async (req, res, next) => {
-    res.status(200).json(res.advancedResults);
+    // res.status(200).json(res.advancedResults);
+
+    let seasons = await Season.find({}).select('-fights');
+
+    res.status(200).json({
+        success: true,
+        data: seasons
+    });
+
 });
 
 //@desc     Get a season by ID

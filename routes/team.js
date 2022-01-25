@@ -9,7 +9,8 @@ const {
 } = require('../controllers/team');
 
 //import middleware
-const advancedResults = require('../middleware/advancedResults');
+// const advancedResults = require('../middleware/advancedResults');
+const simpleSearch = require('../middleware/simpleSearch');
 
 //models
 const Team = require('../models/Team');
@@ -18,7 +19,7 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(advancedResults(Team, 'name', 'teams'), getAllTeams)
+    .get(simpleSearch(Team, 'city', ['city', 'name', 'fullName']), getAllTeams)
     .post(createTeam);
 
 router

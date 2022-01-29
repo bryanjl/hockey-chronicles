@@ -41,7 +41,8 @@ const seedGames = async(gameData) => {
         let team1Info = {
             id: team1._id,
             city: team1.city,
-            name: team1.name
+            name: team1.name,
+            visitor: true
         }
         teams.push(team1Info);
 
@@ -49,7 +50,8 @@ const seedGames = async(gameData) => {
         let team2Info = {
             id: team2._id,
             city: team2.city,
-            name: team2.name
+            name: team2.name,
+            visitor: false
         }
         teams.push(team2Info);
 

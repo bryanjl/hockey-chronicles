@@ -257,6 +257,16 @@ exports.getComments = asyncHandler(async (req, res, next) => {
         })
 });
 
+exports.topFiveMostFights = asyncHandler(async(req, res, next) => {
+    res.status(200).json({
+        success: true,
+        data: {
+            players: res.topFivePlayers,
+            teams: res.topFiveTeams
+        }
+    });
+});
+
 
 const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
         //populate with data 

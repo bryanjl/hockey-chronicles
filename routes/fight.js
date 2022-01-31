@@ -9,7 +9,8 @@ const {
     postComment,
     getComments,
     deleteComment,
-    updateComment
+    updateComment,
+    topFiveMostFights
 } = require('../controllers/fight');
 
 //Model
@@ -18,6 +19,7 @@ const Fight = require('../models/Fight');
 //import middleware
 const advancedResults = require('../middleware/advancedResults');
 const { updatePlayerData } = require('../middleware/updatePlayerData');
+const topFive = require('../middleware/topFive');
 
 const router = express.Router();
 
@@ -25,6 +27,10 @@ router
     .route('/')
     .get(advancedResults(Fight, 'date', 'fights'), getAllFights)
     .post(createFight);
+
+router
+    .route('/topfive')
+    .get(topFive(Fight), topFiveMostFights);
 
 router
     .route('/:id')
@@ -38,5 +44,9 @@ router
     .get(getComments)
     .delete(deleteComment)
     .put(updateComment);
+
+router
+    .route('/topfive')
+    .get(topFive(Fight), topFive);
 
 module.exports = router;

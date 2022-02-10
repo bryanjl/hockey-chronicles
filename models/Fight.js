@@ -61,6 +61,9 @@ const FightSchema = new mongoose.Schema({
     unfair: {
         type: Boolean,
         default: false
+    },
+    winBy: {
+        type: Object
     },  
     createdAt: {
         type: Date,
@@ -229,7 +232,6 @@ FightSchema.methods.updateOutcome = async function(reqOutcome) {
 }
 
 FightSchema.methods.updateActionRating = async function(newScore) {
-    
     let currAverage = this.actionRating.average;
     let votes = this.actionRating.votes;
 

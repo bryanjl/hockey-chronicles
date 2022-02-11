@@ -64,6 +64,10 @@ const FightSchema = new mongoose.Schema({
     },
     winBy: {
         type: Object
+    },
+    time: {
+        type: String,
+        default: "00:00"
     },  
     createdAt: {
         type: Date,

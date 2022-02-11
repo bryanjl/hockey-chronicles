@@ -12,6 +12,10 @@ const GameSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    description: {
+        type: String,
+        default: ""
+    },
     fights: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Fight'
@@ -24,6 +28,10 @@ const GameSchema = new mongoose.Schema({
     },
     teams: {
         type: [Object]
+    },
+    homeTeam: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Team'
     },
     comments: {
         type: [mongoose.Schema.ObjectId],

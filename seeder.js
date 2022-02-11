@@ -42,7 +42,7 @@ const seedGames = async(gameData) => {
             id: team1._id,
             city: team1.city,
             name: team1.name,
-            visitor: true
+            home: false
         }
         teams.push(team1Info);
 
@@ -51,11 +51,12 @@ const seedGames = async(gameData) => {
             id: team2._id,
             city: team2.city,
             name: team2.name,
-            visitor: false
+            home: true
         }
         teams.push(team2Info);
 
         info.teams = teams;
+        info.homeTeam = team2._id;
 
 
         //league info
@@ -131,6 +132,7 @@ const seedGames = async(gameData) => {
             if(data.players.length === 1) {
                 fightInfo.fightType = 'Event';
                 fightInfo.eventDescription = data.players[0];
+                fightInfo.players = [];
             }
 
 
@@ -515,7 +517,7 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_60-61.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_74_75.json`, 'utf-8'));
     seedGames(games);
 } else if(process.argv[2] === '-deleteGames'){
     deleteGames();

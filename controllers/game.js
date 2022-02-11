@@ -159,7 +159,7 @@ exports.postComment = asyncHandler(async (req, res, next) => {
 const sendPopulatedResponse = asyncHandler(async (game, statusCode, res) => {
     //populate with data 
 game = await Game.findById(game._id)
-    .populate('fights', 'players outcome fightType actionRating unfair description')
+    .populate('fights', 'players outcome fightType actionRating unfair description eventDescription')
     .populate('comments', 'body createdAt parentId user username');
 
 res.status(statusCode).json({

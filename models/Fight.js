@@ -4,6 +4,7 @@ const League = require('../models/League');
 const Season = require('../models/Season');
 const Team = require('../models/Team');
 const Player = require('../models/Player');
+const req = require('express/lib/request');
 
 const FightSchema = new mongoose.Schema({
     game: {
@@ -113,122 +114,187 @@ FightSchema.pre('save', async function(next) {
 //update the outcome results based on votes
 FightSchema.methods.updateOutcome = async function(reqOutcome) {
     try {
-        //if all values in the reqoutcome object are the same -> do nothing
-        let reqObjVals = Object.values(reqOutcome);
-        if(reqObjVals.every(val => val === reqObjVals[0])){
-            this.outcome = reqOutcome;
-            return;
-        }
+        //get the keys from req.outcome
+        let reqObjKeys = Object.keys(reqOutcome);
 
-        //currOutcomeWinner is the current winner from this.outcome
-        let currOutcomeKeys = Object.keys(this.outcome);
-        let currOutcomeValue = 0;
-        let currOutcomeWinner;
-        for(let i = 0; i < currOutcomeKeys.length; i++){
-            if(this.outcome[currOutcomeKeys[[i]]] > currOutcomeValue) {
-                currOutcomeWinner = currOutcomeKeys[i];
-                currOutcomeValue = this.outcome[currOutcomeKeys[[i]]];
+        //get players
+        let playerIds = reqObjKeys.filter(key => {
+            if(key === 'draw'){
+                return false;
             }
-        }
-
-        //reqOutcomeWinner is the winner from the request outcome
-        let reqOutcomeKeys = Object.keys(reqOutcome);
+            return true;
+        });
+        let player1 = await Player.findById(playerIds[0]);
+        let player2 = await Player.findById(playerIds[1]);
+        
+        //get the request outcome winner;
         let reqOutcomeValue = 0;
         let reqOutcomeWinner;
-        for(let i = 0; i < reqOutcomeKeys.length; i++){
-            if(reqOutcome[reqOutcomeKeys[i]] > reqOutcomeValue){
-                reqOutcomeWinner = reqOutcomeKeys[i];
-                reqOutcomeValue = reqOutcome[reqOutcomeKeys[i]];
+        for(let i = 0; i < reqObjKeys.length; i++){
+            if(reqOutcome[reqObjKeys[i]] > reqOutcomeValue){
+                reqOutcomeWinner = reqObjKeys[i];
+                reqOutcomeValue = reqOutcome[reqObjKeys[i]];
             }
         }
-
-        //1) same winner as before -> no change
-        if(currOutcomeWinner === reqOutcomeWinner){
-            this.outcome = reqOutcome;
-            return;
-        }
-
-        // 2) draw has most votes previous winnner was a player -> 
-        //prev winner gets -1 wins and +1 draws
-        //prev loser gets -1 losses and +1 draws
-
-        if(reqOutcomeWinner === 'draw' && currOutcomeWinner !== 'draw'){
-            //player1 is the previous winner and recieves -1 wins and +1 draw
-            
-            let player1 = await Player.findById(currOutcomeWinner);
-            if(player1.wins > 0){
-                player1.wins -= 1;
+        
+        //check if initial state
+        if(!this.outcome.winner){
+            //draw recieves the vote
+                //player 1 gets +1 draw
+                //player2 gets +1 draw
+                //make a new field for draw to keep in outcome object
+            if(reqOutcomeWinner === 'draw'){
+                player1.draws += 1;
+                player2.draws += 1;
+                player1.markModified('draws');
+                player2.markModified('draws');
+                await player1.save();
+                await player1.save();
+                reqOutcome.winner = 'draw';
+                this.outcome = reqOutcome;
+                return;
             }
-            player1.draws += 1;
-            await player1.save();
-
-            //player2 is the previous loser and recieves -1 losses and +1 draw
-
-            const prevLoser = currOutcomeKeys.filter(key => key != 'draw' && key != currOutcomeWinner);
-            let player2 = await Player.findById(prevLoser);
-            if(player2.losses > 0) {
-                player2.losses -= 1;
+            //player recieves vote
+                //player who win get +1 win
+                //player who loses gets +1 loss
+                //make a new field for the winner keep in outcome object
+            if(player1._id.toString() === reqOutcomeWinner){
+                player1.wins += 1;
+                player1.markModified('wins');
+                player2.losses += 1;
+                player2.markModified('losses');
+                await player1.save();
+                await player2.save();
+                reqOutcome.winner = reqOutcomeWinner;
+                this.outcome = reqOutcome;
+                return;
+            } else {
+                player2.wins += 1;
+                player2.markModified('wins');
+                player1.losses += 1;
+                player1.markModified('losses');
+                await player1.save();
+                await player2.save();
+                reqOutcome.winner = reqOutcomeWinner;
+                this.outcome = reqOutcome;
+                return;
             }
-            player2.draws += 1;
-            await player2.save();
-
-            this.outcome = reqOutcome;
-            return;
-        }
-
-        // 3)New player winner from old previous player winner ->
-        //prev winner gets -1 wins and +1 losses
-        //new winner gets +1 wins and -1 losses
-
-        if(reqOutcomeWinner !== 'draw' && currOutcomeWinner !== 'draw'){
-            //player1 is the new winner and receives +1 wins and -1 losses
-
-            let player1 = await Player.findById(reqOutcomeWinner);
-            if(player1.losses > 0){
-                player1.losses -= 1;
+        } else { //not initial state
+            //check if it's same state (same winner, loser)
+                //do nothing -> no change to players
+            if(this.outcome.winner === reqOutcomeWinner){
+                reqOutcome.winner = this.outcome.winner;
+                this.outcome = reqOutcome;
+                return;
             }
-            player1.wins += 1;
-            await player1.save();
-
-            //player2 is the prev winner and receives -1 wins and +1 losses
-
-            let player2 = await Player.findById(currOutcomeWinner);
-            if(player2.wins > 0) {
-                player2.wins -= 1;
+            //check if there is a tie in the request outcome object
+            let tie = false;
+            for(let i = 0; i < reqObjKeys.length; i++){
+                if(reqOutcome[reqObjKeys[i]] === reqOutcomeValue && reqObjKeys[i] !== reqOutcomeWinner){
+                    tie = true;
+                }
             }
-            player2.losses += 1;
-            await player2.save();
-
-            this.outcome = reqOutcome;
-            return;
-        }
-
-        //4)new player winner previous was a draw ->
-        //new winner gets +1 win and -1 draws
-        //new loser gets +1 losses and -1 draws
-
-        if(reqOutcomeWinner !== 'draw' && currOutcomeWinner === 'draw'){
-            //player1 is the new winner and receives +1 wins and -1 draws
-
-            let player1 = await Player.findById(reqOutcomeWinner);
-            if(player1.draws > 1){
-                player1.draws -= 1;
+            //if tie then return and do nothing
+            if(tie){
+                reqOutcome.winner = this.outcome.winner;
+                this.outcome = reqOutcome;
+                return;
             }
-            player1.wins += 1;
-            await player1.save();
 
-            //player2 is the new loser and recieves +1 losses and -1 draws
-
-            const newLoser = reqOutcomeKeys.filter(key => key != 'draw' && key != reqOutcomeWinner);
-            let player2 = await Player.findById(newLoser);
-            if(player2.draws > 0){
-                player2.draws -= 1;
+            //new 'draw' winner
+                //check against field in outcome obj (winner)
+                //previous player winner gets -1 wins and +1 draws
+                //previous player loser gets -1 losses and +1 draws
+                //update field (winner) in outcome obj -> should be 'draw'
+            if(reqOutcomeWinner === 'draw'){
+                if(this.outcome.winner === player1._id.toString()){
+                    player1.wins -= 1;
+                    player1.draws += 1;
+                    player1.markModified('draws');
+                    player1.markModified('wins');
+                    player2.losses -= 1;
+                    player2.draws += 1;
+                    player2.markModified('losses');
+                    player2.markModified('draws');
+                    await player1.save();
+                    await player2.save();
+                    reqOutcome.winner = 'draw';
+                    this.outcome = reqOutcome;
+                    return;
+                } else {
+                    player2.wins -= 1;
+                    player2.draws += 1;
+                    player2.markModified('draws');
+                    player2.markModified('wins');
+                    player1.losses -= 1;
+                    player1.draws += 1;
+                    player1.markModified('losses');
+                    player1.markModified('draws');
+                    await player1.save();
+                    await player2.save();
+                    reqOutcome.winner = 'draw';
+                    this.outcome = reqOutcome;
+                    return; 
+                }  
+            } else {
+                //previous state was draw
+                    //check against field in outcome obj (winner)
+                    //new player winner gets +1 wins and -1 draws
+                    //new loser player gets +1 losses and -1 draws
+                    //update field (winner) in outcome obj
+                if(this.outcome.winner === 'draw'){
+                    player1.draws -= 1;
+                    player2.draws -= 1;
+                    player1.markModified('draws');
+                    player2.markModified('draws');
+                    if(reqOutcomeWinner === player1._id.toString()){
+                        player1.wins += 1;
+                        player2.losses += 1;
+                        player1.markModified('wins');
+                        player2.markModified('losses');
+                    } else {
+                        player2.wins += 1;
+                        player1.losses += 1;
+                        player2.markModified('wins');
+                        player1.markModified('losses');
+                    }
+                    reqOutcome.winner = reqOutcomeWinner;
+                    this.outcome = reqOutcome;
+                    await player1.save();
+                    await player2.save();
+                    return;
+                } else {
+                    //previous state was other player?
+                        //check against field in outcome obj (winner)
+                        //new player winner gets +1 win and -1 losses
+                        //new player loser gets +1 losses and -1 wins
+                        //update field (winner) in outcome obj
+                    if(reqOutcomeWinner === player1._id.toString()){
+                        player1.wins += 1;
+                        player1.losses -= 1;
+                        player1.markModified('wins');
+                        player1.markModified('losses');
+                        player2.wins -= 1;
+                        player2.losses += 1;
+                        player2.markModified('wins');
+                        player2.markModified('losses');
+                    } else {
+                        player2.wins += 1;
+                        player2.losses -= 1;
+                        player2.markModified('wins');
+                        player2.markModified('losses');
+                        player1.wins -= 1;
+                        player1.losses += 1;
+                        player1.markModified('wins');
+                        player1.markModified('losses');
+                    }
+                    reqOutcome.winner = reqOutcomeWinner;
+                    this.outcome = reqOutcome;
+                    await player1.save();
+                    await player2.save();
+                    return;
+                }
             }
-            player2.losses += 1;
-            await player2.save();
-
-            this.outcome = reqOutcome;
-            return;
         }
     } catch (error) {
         console.log(error);

@@ -25,6 +25,19 @@ exports.getPlayer = asyncHandler(async (req, res, next) => {
     sendPopulatedResponse(player, 200, res);
 });
 
+//@desc     Search players by lastName 
+//@route    GET /api/v1/players/search?query
+//@access   Public
+exports.playerSearch = asyncHandler(async (req, res, next) => {
+    // console.log(req.query);
+    const regex = new RegExp(req.query.lastName, 'gi');
+    let results = await Player.find({ lastName: regex }).select('firstName lastName');
+
+    res.status(200).json({
+        players: results
+    });
+});
+
 //@desc     Create a player
 //@route    POST /api/v1/players/
 //@access   Private - logged in user

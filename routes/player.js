@@ -5,7 +5,8 @@ const {
     getPlayer,
     createPlayer,
     updatePlayer,
-    deletePlayer
+    deletePlayer,
+    playerSearch
 } = require('../controllers/player');
 
 //import middleware
@@ -21,10 +22,16 @@ router
     .get(advancedResults(Player, 'lastName', 'default'), getAllPlayers)
     .post(createPlayer);
 
+router  
+    .route('/search')
+    .get(playerSearch);
+
 router
     .route('/:id')
     .get(getPlayer)
     .put(updatePlayer)
     .delete(deletePlayer);
+
+
 
 module.exports = router;

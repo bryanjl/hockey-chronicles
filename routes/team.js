@@ -5,7 +5,8 @@ const {
     getTeam,
     createTeam,
     updateTeam,
-    deleteTeam
+    deleteTeam,
+    teamSearch
 } = require('../controllers/team');
 
 //import middleware
@@ -21,6 +22,10 @@ router
     .route('/')
     .get(simpleSearch(Team, 'city', ['city', 'name', 'fullName']), getAllTeams)
     .post(createTeam);
+
+router  
+    .route('/search')
+    .get(teamSearch);
 
 router
     .route('/:id')

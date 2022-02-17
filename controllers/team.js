@@ -25,6 +25,19 @@ exports.getTeam = asyncHandler(async (req, res, next) => {
     sendPopulatedResponse(team, 200, res);
 });
 
+//@desc     Search teams by city
+//@route    GET /api/v1/teams/search?query
+//@access   Public
+exports.teamSearch = asyncHandler(async (req, res, next) => {
+    // console.log(req.query);
+    const regex = new RegExp(req.query.city, 'gi');
+    let results = await Team.find({ city: regex }).select('city name');
+
+    res.status(200).json({
+        teams: results
+    });
+});
+
 //@desc     Create a team
 //@route    POST /api/v1/teams/
 //@access   Private - logged in user

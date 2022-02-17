@@ -7,10 +7,11 @@ const { createFight } = require('./helpers/createFight');
 
 //models
 const Fight = require('../models/Fight');
-const League = require('../models/League');
-const Season = require('../models/Season');
-const Team = require('../models/Team');
-const Player = require('../models/Player');
+const Game = require('../models/Game');
+// const League = require('../models/League');
+// const Season = require('../models/Season');
+// const Team = require('../models/Team');
+// const Player = require('../models/Player');
 // const User = require('../models/User');
 const Comment = require('../models/Comment');
 
@@ -161,10 +162,29 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
 //@route    DELETE /api/v1/fights/:id
 //@access   Private - logged in user
 exports.deleteFight = asyncHandler(async (req, res, next) => {
-    //fights should not be deleted -> no method/function
+    let fight = await Fight.findById(req.params.id);
+    if(!fight){
+        return next(new ErrorResponse(`Fight not found`, 404));
+    }
+
+    let game = await Game.findById(fight.game);
+    if(!game) {
+        return next(new ErrorResponse(`Game not found`, 404));
+    }
+
+    let newFightArr = game.fights.filter(elem => {
+         return elem._id !== fight._id;
+    });
+
+    game.fights = newFightArr;
+    game.markModified('fights');
+    await game.save();
+
+    await Fight.findByIdAndDelete(req.params.id);
+
     res.status(200).json({
         success: true,
-        message: `Route for deleting a fight by id of ${req.params.id}`
+        message: `Fight with ID of ${req.params.id} removed from database`
     });
 });
 

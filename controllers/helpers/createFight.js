@@ -9,7 +9,7 @@ const Player = require('../../models/Player');
 
 exports.createFight = asyncHandler(async (req) => {
     let fightInfo = {};
-    
+
     fightInfo.league = req.body.league;
     fightInfo.season = req.body.season;
     fightInfo.game = req.body.game;
@@ -86,7 +86,11 @@ exports.createFight = asyncHandler(async (req) => {
     }
 
     //fightType
-    fightInfo.fightType = req.body.fightType;
+    if(!req.body.fightType){
+        fightInfo.fightType = 'Fight';
+    } else {
+        fightInfo.fightType = req.body.fightType;
+    }
 
     // create fight
     let fight = await Fight.create(fightInfo);

@@ -112,9 +112,34 @@ exports.getGame = asyncHandler(async (req, res,next) => {
 //@route    PUT /api/v1/games/:id
 //@access   Private
 exports.updateGame = asyncHandler(async (req, res,next) => {
+    console.log(req.body);
+
+    let game = await Game.findById(req.params.id);
+    
+    if(req.body.season){
+        //update season
+        console.log(req.body);
+        await game.updateSeason(req.body.season);
+
+        game.markModified('season');
+        await game.save();
+
+        delete req.body.season;
+    }
+
+    if(req.body.teams) {
+        //update teams
+        await game.updateTeams(req.body.teams);
+        game.markModified('teams');
+        await game.save();
+
+        delete req.body.teams;
+    }
+
+
     res.status(200).json({
         success: true,
-        message: 'route for updating a game by ID'
+        data: game
     });
 });
 

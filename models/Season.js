@@ -5,10 +5,6 @@ const SeasonSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a season']
     },
-    fights: {
-        type: [mongoose.Schema.ObjectId],
-        ref: 'Fight'
-    },
     games: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Game'

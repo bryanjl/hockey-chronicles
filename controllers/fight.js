@@ -173,7 +173,7 @@ exports.deleteFight = asyncHandler(async (req, res, next) => {
     }
 
     let newFightArr = game.fights.filter(elem => {
-         return elem._id !== fight._id;
+         return elem._id.toString() !== fight._id.toString();
     });
 
     game.fights = newFightArr;

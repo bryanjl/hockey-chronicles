@@ -150,7 +150,36 @@ exports.updateGame = asyncHandler(async (req, res,next) => {
 
     if(req.body.teams) {
         //update teams
-        await game.updateTeams(req.body.teams);
+
+        let oldTeam = req.body.teams.oldTeam;
+        let newTeam = req.body.teams.newTeam;
+
+        let teamsObj = [];
+        if(game.teams[0].id === oldTeam.id){
+            teamsObj.push(game.teams[1]);
+        } else {
+            teamsObj.push(game.teams[0]);
+        }
+        //new teams object for game
+        teamsObj.push(newTeam);
+
+        let teamRemoved = await Team.findById(oldTeam.id);
+        let teamAdded = await Team.findById(newTeam.id);
+
+        let newGamesOfRemovedTeam = teamRemoved.games.filter(elem => {
+            elem !== game._id;
+        });
+
+        teamRemoved.games = newGamesOfRemovedTeam;
+        teamRemoved.markModified('games');
+        await teamRemoved.save();
+
+        teamAdded.games.push(game._id);
+        teamAdded.markModified('games');
+        await teamAdded.save();
+
+        //method for fight
+        await game.updateTeamsFights(oldTeam.id, newTeam.id, teamsObj);
         game.markModified('teams');
         await game.save();
 

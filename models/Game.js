@@ -103,7 +103,7 @@ GameSchema.methods.updateTeams = async function(reqTeams) {
     }
 }
 
-GameSchema.methods.updateSeason = async function(reqSeason) {
+GameSchema.methods.updateSeason = async function() {
     // console.log(this.season)
     try {
         let currSeason = await Season.findById(this.season.id);
@@ -115,16 +115,6 @@ GameSchema.methods.updateSeason = async function(reqSeason) {
         currSeason.markModified('games');
         await currSeason.save();
 
-        let newSeason = await Season.findOne({ season: `${reqSeason}` });
-        newSeason.games.push(this._id);
-        newSeason.markModified('games');
-        await newSeason.save();
-        console.log(newSeason);
-
-        this.season = {
-            id: newSeason._id,
-            season: newSeason.season
-        }
     } catch (error) {
         console.log(error);
     }

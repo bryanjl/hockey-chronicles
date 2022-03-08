@@ -112,18 +112,39 @@ exports.getGame = asyncHandler(async (req, res,next) => {
 //@route    PUT /api/v1/games/:id
 //@access   Private
 exports.updateGame = asyncHandler(async (req, res,next) => {
-    console.log(req.body);
+    // console.log(req.body);
 
     let game = await Game.findById(req.params.id);
+
+    if(!game){
+        return next(new ErrorResponse(`Game with ID of ${req.params.id} not found`, 404));
+    }
     
     if(req.body.season){
         //update season
-        console.log(req.body);
-        await game.updateSeason(req.body.season);
+        
+        // get the new season
+        let season = await Season.findOne({season: req.body.season});
+        
+        // create the new season object for game model
+        let updatedSeason = {
+            id: season._id.toString(),
+            season: season.season
+        }
+        //remove the game from current season the game was set to
+        await game.updateSeason();
 
+        //add the game to th new season
+        season.games.push(game._id);
+        season.markModified('games');
+        await season.save();
+
+        //update the game's season object
+        game.season = updatedSeason;
         game.markModified('season');
         await game.save();
 
+        //already updated can be removed fom the req body
         delete req.body.season;
     }
 
@@ -136,10 +157,11 @@ exports.updateGame = asyncHandler(async (req, res,next) => {
         delete req.body.teams;
     }
 
+    const updatedGame = await Game.findByIdAndUpdate(req.params.id, req.body, {new: true});
 
     res.status(200).json({
         success: true,
-        data: game
+        data: updatedGame
     });
 });
 

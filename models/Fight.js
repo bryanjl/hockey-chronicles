@@ -82,34 +82,7 @@ const FightSchema = new mongoose.Schema({
 
 
 //saving references of created fights to other collections(season, league, player, etc)
-FightSchema.pre('save', async function(next) {
-    if(this.isNew){
-        //create reference of fight for season
-        let season = await Season.findById(this.season.id);
-        season.fights.push(this._id);
-        await season.save();
-
-        //create reference of fight for league
-        let league = await League.findById(this.league.id);
-        league.fights.push(this._id);
-        await league.save();
-
-        //create reference of fight for players
-        this.players.forEach(async(element) => {
-            let player = await Player.findById(element.id);
-            player.fights.push(this._id);
-            await player.save();
-        });
-
-        //create reference of fight for teams
-        this.teams.forEach(async(element) => {
-            let team = await Team.findById(element.id);
-            team.fights.push(this._id);
-            await team.save();
-        });
-    }
-    next();
-});
+    //references to models done in createFight helper
 
 //update the outcome results based on votes
 FightSchema.methods.updateOutcome = async function(reqOutcome) {

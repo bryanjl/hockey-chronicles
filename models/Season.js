@@ -8,6 +8,10 @@ const SeasonSchema = new mongoose.Schema({
     games: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Game'
+    },
+    fights: {
+        type: [mongoose.Schema.ObjectId],
+        ref: 'Fight'
     }
 });
 

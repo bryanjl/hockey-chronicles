@@ -16,7 +16,7 @@ const simpleSearch = (model, sortBy, fieldsToSearch) => async(req, res, next) =>
         let fields = [];
         fieldsToSearch.forEach(field => {
             let obj = {};
-            obj[field] = req.query.term;
+            obj[field] = new RegExp(req.query.term, 'i');
             fields.push(obj)
         });
 

@@ -189,9 +189,9 @@ const seedGames = async(gameData) => {
                 //outcome frequency counter for voting
                 let outcome = {};
                 fightInfo.players.forEach(element => {
-                    outcome[element.id] = 1;
+                    outcome[element.id] = 0;
                 });
-                outcome.draw = 1;
+                outcome.draw = 0;
                 //set outcome object to request body
                 fightInfo.outcome = outcome;
             }

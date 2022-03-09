@@ -327,20 +327,37 @@ FightSchema.methods.updateUnfair = async function(newUnfair){
 
 //THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING PLAYERS
 FightSchema.methods.updatePlayers = async function(playersToChange){
+    //playerToAdd/playerToRemove come from request
+    let playerToAdd = playersToChange.newPlayer;
+    let playerToRemove = playersToChange.oldPlayer;
+
     //get player that isn't changing
     let playersArr = this.players;
-    let index = playersArr.indexOf(playersToChange[0]);
-    if(index > -1){
-        playersArr.splice(index, 1);
+
+    let playerToStay = {};
+    if(playersArr[0].id.toString() === playerToRemove.id){
+        playerToStay = playersArr[1];
+    } else if (playersArr[1].id.toString() === playerToRemove.id) {
+        playerToStay = playersArr[0];
     }
-    let otherPlayer = playersArr[0];
 
     //stats obj to update players/fight
+    //Build up stats object to switch info between players from this fight
     let stats = {
         wins: 0,
         losses: 0,
-        draw: 0
+        draws: 0
     };
+
+    //THIS IS A BUG -> WONT PROVIDE CORRECT RESULT -> NEED to REWORK OUTCOME 
+    //Win loss or draw
+    if(this.outcome[playerToRemove.id] > this.outcome[playerToStay.id]){
+        stats.wins = 1;
+    } else if(this.outcome[playerToRemove.id] < this.outcome[playerToStay.id]){
+        stats.losses = 1;
+    } else {
+        stats.draws = 1;
+    }
 
     //unfair tally to change players
     let unfairTally;
@@ -351,61 +368,66 @@ FightSchema.methods.updatePlayers = async function(playersToChange){
     stats.actionRating = this.actionRating.average;
     stats.votes = this.actionRating.votes;
 
-    //Win loss or draw
-    if(this.outcome[this.players[0]] === this.outcome[this.players[1]]){
-        stats.draw = 1;
-    } else if(this.outcome[playersToChange[0]] > this.outcome[otherPlayer]){
-        stats.wins = 1;
-    } else {
-        stats.losses = 1;
-    }
+    //get Players instances to change data
+    let playerToRemoveInstance = await Player.findById(playerToRemove.id);
+    let playerToAddInstance = await Player.findById(playerToAdd.id);
 
     //outcome
-    stats.outcome = this.outcome[playersToChange[[0]]];
-
-    //get Players
-    let playerToRemove = await Player.findById(playersToChange[0]);
-    let playerToAdd = await Player.findById(playersToChange[1]);
+    stats.outcome = this.outcome[playerToRemove.id];
 
     //update the outcome freq counter
-    delete this.outcome[playersToChange[0]];
-    this.outcome[playersToChange[1]] = stats.outcome;
+    delete this.outcome[playerToRemove.id];
+    this.outcome[playerToAdd.id] = stats.outcome;
 
-    //change players stats
+    //change players stats on the instances
     //wins-loss-draw
-    playerToRemove.wins += -stats.wins;
-    playerToRemove.losses += -stats.losses;
-    playerToRemove.draw += -stats.draw;
+    playerToRemoveInstance.wins += -stats.wins;
+    playerToRemoveInstance.losses += -stats.losses;
+    playerToRemoveInstance.draw += -stats.draws;
 
-    playerToAdd.wins += stats.wins;
-    playerToAdd.losses += stats.losses;
-    playerToAdd.draw += stats.draw;
+    playerToAddInstance.wins += stats.wins;
+    playerToAddInstance.losses += stats.losses;
+    playerToAddInstance.draw += stats.draws;
 
     //player's action rating
     //actionrating is alrady averaged no need to adjust votes
-    await playerToRemove.updateActionRating(-stats.actionRating);
-    await playerToAdd.updateActionRating(stats.actionRating);
+    await playerToRemoveInstance.updateActionRating(-stats.actionRating);
+    await playerToAddInstance.updateActionRating(stats.actionRating);
 
-    playerToAdd.markModified('actionRating');
-    playerToRemove.markModified('actionRating');
+    playerToAddInstance.markModified('actionRating');
+    playerToRemoveInstance.markModified('actionRating');
 
     //unfair tally
-    playerToRemove.unfairTally += -stats.unfairTally;
-    playerToAdd.unfairTally += stats.unfairTally;
+    playerToRemoveInstance.unfairTally += -stats.unfairTally;
+    playerToAddInstance.unfairTally += stats.unfairTally;
 
     //player's fights array
-    playerToAdd.fights.push(this._id);
-    let fightIndex = playerToRemove.fights.indexOf(this._id);
-    playerToRemove.fights.splice(fightIndex, 1);
-    playerToAdd.markModified('fights');
-    playerToRemove.markModified('fights');
+    playerToAddInstance.fights.push(this._id);
+    let fightIndex = playerToRemoveInstance.fights.indexOf(this._id);
+    playerToRemoveInstance.fights.splice(fightIndex, 1);
+    playerToAddInstance.markModified('fights');
+    playerToRemoveInstance.markModified('fights');
+
+    //save players
+    await playerToRemoveInstance.save();
+    await playerToAddInstance.save();
 
     //change the fights player array
-    this.players = [otherPlayer, playersToChange[1]];
-    
-    //save players
-    await playerToRemove.save();
-    await playerToAdd.save();
+    //embed new data into document of fight
+    //playerToStay has not changed 
+    let newPlayerInfo = {
+        id: playerToAddInstance._id,
+        firstName: playerToAddInstance.firstName,
+        lastName: playerToAddInstance.lastName,
+        position: playerToAddInstance.position,
+        wins: playerToAddInstance.wins,
+        losses: playerToAddInstance.losses,
+        draws: playerToAddInstance.draws,
+        height: playerToAddInstance.height,
+        weight: playerToAddInstance.weight,
+        shoots: playerToAddInstance.shoots
+    }
+    this.players = [playerToStay, newPlayerInfo];
 }
 
 //THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING TEAMS

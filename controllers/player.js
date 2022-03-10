@@ -69,7 +69,7 @@ exports.updatePlayer = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Cannot update wins, losses or fights of a Player`, 400));
     }
 
-    player = await Player.findByIdAndUpdate(req.params.id, req.body);
+    player = await Player.findByIdAndUpdate(req.params.id, req.body, {new: true});
 
     sendPopulatedResponse(player, 200, res);
 });

@@ -56,7 +56,7 @@ exports.createFight = asyncHandler(async (req) => {
         players.push(player1Info);
         players.push(player2Info);
         fightInfo.players = players;
-        // console.log(fightInfo);
+     
         //outcome frequency counter for voting
         let outcome = {};
         fightInfo.players.forEach(element => {
@@ -66,7 +66,6 @@ exports.createFight = asyncHandler(async (req) => {
         //set outcome object to request body
         fightInfo.outcome = outcome;
     }
-
 
     //teams
     fightInfo.teams = req.body.teams;
@@ -102,12 +101,8 @@ exports.createFight = asyncHandler(async (req) => {
         fightInfo.fightType = req.body.fightType;
     }
 
-    // console.log(fightInfo);
-
     // create fight
     let fight = await Fight.create(fightInfo);
-
-    // console.log(fight);
 
     if(!fight){
         return next(new ErrorResponse(`Unable to create fight - Server Error`, 500));
@@ -130,8 +125,6 @@ exports.createFight = asyncHandler(async (req) => {
     }    
     await addReferenceToSeason(fightInfo.season.id, fight._id);
     await addReferenceToTeams(fightInfo.teams, fight._id);   
-
-    console.log(fight);
 
     return fight;
 });

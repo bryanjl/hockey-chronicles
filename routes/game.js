@@ -12,6 +12,7 @@ const {
 //import middleware
 const { fightCreate } = require('../middleware/fightCreate');
 const advancedResults = require('../middleware/advancedResults');
+const gameSearch = require('../middleware/gameSearch');
 
 //import model
 const Game = require('../models/Game');
@@ -20,7 +21,7 @@ const router = express.Router();
 
 router 
     .route('/')
-    .get(advancedResults(Game, 'date', 'fights'), getAllGames) 
+    .get(gameSearch(), getAllGames) 
     .post(fightCreate, createGame);
 
 router
@@ -33,4 +34,6 @@ router
     .route('/:id/comments')
     .post(postComment);
 
-module.exports = router
+module.exports = router;
+
+// advancedResults(Game, 'date', 'fights'), 

@@ -47,6 +47,9 @@ const PlayerSchema = new mongoose.Schema({
     },
     shoots: {
         type: String
+    },
+    yearsActive: {
+        type: String
     }
 });
 

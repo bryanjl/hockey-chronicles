@@ -5,6 +5,9 @@ const LeagueSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a name for the League']
     },
+    description: {
+        type: String
+    },
     fights: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Fight'

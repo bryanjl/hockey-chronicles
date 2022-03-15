@@ -49,7 +49,7 @@ const PlayerSchema = new mongoose.Schema({
         type: String
     },
     yearsActive: {
-        type: String
+        type: [String]
     }
 });
 

@@ -23,7 +23,7 @@ const TeamSchema = new mongoose.Schema({
         type: [mongoose.Schema.ObjectId],
         ref: 'Game'
     },
-    activeYears: {
+    yearsActive: {
         type: String
     }
 });

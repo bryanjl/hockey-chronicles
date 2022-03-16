@@ -27,6 +27,10 @@ exports.getLeague = asyncHandler(async (req, res, next) => {
 exports.createLeague = asyncHandler(async (req, res, next) => {
     req.body.name = req.body.name.toUpperCase();
 
+    req.body.leagueImageFile = req.file.path;
+
+    console.log(req.body);
+
     let league = await League.create(req.body);
     
     sendPopulatedResponse(league, 200, res);

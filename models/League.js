@@ -15,6 +15,9 @@ const LeagueSchema = new mongoose.Schema({
     games: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Game'
+    },
+    leagueImageFile: {
+        type: String
     }
 });
 

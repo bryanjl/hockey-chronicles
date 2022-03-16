@@ -1,4 +1,7 @@
 const express = require('express');
+//middleware
+const multerImageUpload = require('../middleware/imageUpload');
+const upload = multerImageUpload('leagues');
 //controllers
 const {
     getAllLeagues,
@@ -39,7 +42,7 @@ router
                 select: 'season'
             }
         ]}, 'name'), getAllLeagues)
-    .post(createLeague);
+    .post(upload.single('leagueImg'), createLeague);
 
 router
     .route('/:id')

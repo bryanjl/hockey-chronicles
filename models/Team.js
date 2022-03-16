@@ -24,6 +24,9 @@ const TeamSchema = new mongoose.Schema({
         ref: 'Game'
     },
     yearsActive: {
+        type: [String]
+    },
+    teamImageFile: {
         type: String
     }
 });

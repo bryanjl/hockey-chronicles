@@ -37,6 +37,9 @@ if(process.env.NODE_ENV === 'development'){
 //     app.use(express.static('client/build'));
 // }
 
+//uploaded image folders made public
+app.use('/uploads', express.static('uploads'));
+
 //cors -> used in production??
 app.use(cors());
 

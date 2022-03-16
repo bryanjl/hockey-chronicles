@@ -48,12 +48,12 @@ exports.createTeam = asyncHandler(async (req, res, next) => {
     }
 
     req.body.league = {
-        id: league._id,
+        id: league._id.toString(),
         name: league.name
     }
 
-    // req.body.fullName = `${req.body.city} ${req.body.name}`;
-    
+    req.body.teamImageFile = req.file.path;
+
     let team = await Team.create(req.body);
 
     sendPopulatedResponse(team, 200, res);

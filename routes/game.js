@@ -22,8 +22,8 @@ const router = express.Router();
 router 
     .route('/')
     .get(gameSearch(), getAllGames) 
-    .post(fightCreate, createGame);
-
+    .post(createGame);
+    // fightCreate,  <---in post route????
 router
     .route('/:id')
     .get(getGame)

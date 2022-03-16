@@ -29,41 +29,27 @@ exports.createGame = asyncHandler(async (req, res, next) => {
         gameInfo.date = new Date(req.body.date);
 
         //set teams
-        let teams = [];
-        let team1 = await Team.findOne({ city: req.body.teams[0] });
-        let team1Info = {
-            id: team1._id,
-            city: team1.city,
-            name: team1.name
-        }
-        teams.push(team1Info);
+        gameInfo.teams = req.body.teams;
 
-        let team2 = await Team.findOne({ city: req.body.teams[1] });
-        let team2Info = {
-            id: team2._id,
-            city: team2.city,
-            name: team2.name
-        }
-        teams.push(team2Info);
-
-        gameInfo.teams = teams
+        //set description
+        gameInfo.description = req.body.description;
 
         //set league
-        let leagueInfo = await League.findOne({ name: req.body.league });
+        let leagueInstance = await League.findOne({ name: req.body.league });
 
         let league = {
-            id: leagueInfo._id,
-            name: leagueInfo.name
+            id: leagueInstance._id,
+            name: leagueInstance.name
         }
 
         gameInfo.league = league;
 
         //set season
-        let seasonInfo = await Season.findOne({ season: req.body.season });
+        let seasonInstance = await Season.findOne({ season: req.body.season });
 
         let season = {
-            id: seasonInfo._id,
-            season: seasonInfo.season
+            id: seasonInstance._id,
+            season: seasonInstance.season
         }
 
         gameInfo.season = season;
@@ -73,18 +59,38 @@ exports.createGame = asyncHandler(async (req, res, next) => {
             gameInfo.gameType = req.body.gameType 
         }
         
+        //get homeTeam
+        if(gameInfo.teams[0].home){
+            gameInfo.homeTeam = gameInfo.teams[0].id;
+        } else {
+            gameInfo.homeTeam = gameInfo.teams[1].id;
+        }
+
         let game = await Game.create(gameInfo);
 
-        if(req.body.fightId){
-            game.fights.push(req.body.fightId);
-            game.markModified('fights');
-            await game.save();
+        //add game to each team's games array
+        let team1 = await Team.findById(gameInfo.teams[0].id);
+        let team2 = await Team.findById(gameInfo.teams[1].id);
 
-            let fight = await Fight.findById(req.body.fightId);
-            fight.game = game._id;
-            fight.markModified('game');
-            await fight.save();
-        }
+        team1.games.push(game._id);
+        team2.games.push(game._id);
+
+        team1.markModified('games');
+        team2.markModified('games');
+
+        await team1.save();
+        await team2.save();
+
+        //add game to league games
+        leagueInstance.games.push(game._id);
+        leagueInstance.markModified('games');
+        await leagueInstance.save();
+
+        //add game to season games
+        seasonInstance.games.push(game._id);
+        seasonInstance.markModified('games');
+        await seasonInstance.save();
+
 
         res.status(200).json({
             success: true,

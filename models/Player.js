@@ -50,6 +50,9 @@ const PlayerSchema = new mongoose.Schema({
     },
     yearsActive: {
         type: [String]
+    },
+    playerImageFile: {
+        type: String
     }
 });
 

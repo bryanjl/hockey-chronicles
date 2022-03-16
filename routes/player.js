@@ -1,4 +1,7 @@
 const express = require('express');
+//middleware
+const multerImageUpload = require('../middleware/imageUpload');
+const upload = multerImageUpload('players');
 //controllers
 const {
     getAllPlayers,
@@ -20,7 +23,7 @@ const router = express.Router();
 router
     .route('/')
     .get(advancedResults(Player, 'lastName', 'default'), getAllPlayers)
-    .post(createPlayer);
+    .post(upload.single('playerImg'), createPlayer);
 
 router  
     .route('/search')

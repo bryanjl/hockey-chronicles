@@ -50,6 +50,8 @@ exports.createPlayer = asyncHandler(async (req, res, next) => {
     //set actionRating to request body
     req.body.actionRating = actionRating;
 
+    req.body.playerImageFile = req.file.path;
+
     let player = await Player.create(req.body);
 
     sendPopulatedResponse(player, 200, res);

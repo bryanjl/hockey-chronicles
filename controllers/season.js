@@ -1,4 +1,5 @@
 const asyncHandler = require('../middleware/async');
+const League = require('../models/League');
 const Season = require('../models/Season');
 const ErrorResponse = require('../utils/ErrorResponse');
 
@@ -38,10 +39,20 @@ exports.createSeason = asyncHandler(async (req, res, next) => {
     if(!seasonFormat.test(req.body.season)){
         return next(new ErrorResponse(`Please use proper format YYYY-YYYY for seasons`, 400));
     }
-    
-    let season = await Season.create(req.body);
 
-    sendPopulatedResponse(season, 200, res);
+    //check if season exists season and league
+    let existingSeason = await Season.findOne({season: req.body.season, league: req.body.league});
+    
+    if(!existingSeason){
+        let league = await League.findOne({name: req.body.league});
+        if(!league){
+            return next(new ErrorResponse(`League doesn't exist`, 400));
+        }
+        let season = await Season.create(req.body);
+        sendPopulatedResponse(season, 200, res);
+    } else {
+        return next(new ErrorResponse(`Season already exists`, 400));
+    }
 });
 
 //@desc     Update a season

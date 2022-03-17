@@ -5,6 +5,9 @@ const SeasonSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add a season']
     },
+    league: {
+        type: String
+    },
     games: {
         type: [mongoose.Schema.ObjectId],
         ref: 'Game'

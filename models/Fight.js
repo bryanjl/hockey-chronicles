@@ -77,6 +77,10 @@ const FightSchema = new mongoose.Schema({
     createdBy: {
         type: mongoose.Schema.ObjectId,
         ref: 'User',
+    },
+    featuredFight: {
+        type: Boolean,
+        default: false
     }
 });
 

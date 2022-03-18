@@ -8,11 +8,6 @@ const { createFight } = require('./helpers/createFight');
 //models
 const Fight = require('../models/Fight');
 const Game = require('../models/Game');
-// const League = require('../models/League');
-// const Season = require('../models/Season');
-// const Team = require('../models/Team');
-// const Player = require('../models/Player');
-// const User = require('../models/User');
 const Comment = require('../models/Comment');
 
 
@@ -240,6 +235,9 @@ exports.getComments = asyncHandler(async (req, res, next) => {
         })
 });
 
+//@desc     Get the top five fights for players/teams
+//@route    GET /api/v1/fights/topfive
+//@access   Public
 exports.topFiveMostFights = asyncHandler(async(req, res, next) => {
     res.status(200).json({
         success: true,
@@ -250,13 +248,49 @@ exports.topFiveMostFights = asyncHandler(async(req, res, next) => {
     });
 });
 
+//@desc     Get the featured fight
+//@route    GET /api/v1/fights/featuredfight
+//@access   Public
+exports.getFeaturedFight = asyncHandler(async(req, res, next) => {
+    let fight = await Fight.findOne({ featuredFight: true });
+
+    if(!fight){
+        return next(new ErrorResponse(`Cannot find featured fight`, 404));
+    }
+
+    sendPopulatedResponse(fight, 200, res);
+});
+
+//@desc     Set the featured fight
+//@route    PUT /api/v1/fights/featuredfight
+//@access   Public
+exports.setFeaturedFight = asyncHandler(async(req, res, next) => {
+    let fight = await Fight.findOne({ featuredFight: true });
+
+    if(fight){
+        fight.featuredFight = false;
+        fight.markModified('featuredFight');
+        await fight.save();
+    }
+
+    let newFeaturedFight = await Fight.findById(req.body.fightId);
+    if(!newFeaturedFight){
+        return next(new ErrorResponse(`Cannot find fight to feature`, 404));
+    }
+
+    newFeaturedFight.featuredFight = true;
+    newFeaturedFight.markModified('featuredFight');
+    await newFeaturedFight.save();
+
+    sendPopulatedResponse(newFeaturedFight, 200, res);
+});
+
+
+
 
 const sendPopulatedResponse = asyncHandler(async (fight, statusCode, res) => {
-        //populate with data 
+    //populate with data 
     fight = await Fight.findById(fight._id)
-        // .populate('league', 'name')
-        // .populate('season', 'season')
-        // .populate('players', 'firstName lastName position wins losses draws height weight shoots')
         .populate('game', 'homeTeam')
         .populate('comments', 'body createdAt parentId user username');
 

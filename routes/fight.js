@@ -10,7 +10,9 @@ const {
     getComments,
     deleteComment,
     updateComment,
-    topFiveMostFights
+    topFiveMostFights,
+    getFeaturedFight,
+    setFeaturedFight
 } = require('../controllers/fight');
 
 //Model
@@ -31,6 +33,11 @@ router
 router
     .route('/topfive')
     .get(topFive(Fight), topFiveMostFights);
+
+router  
+    .route('/featuredfight')
+    .get(getFeaturedFight)
+    .put(setFeaturedFight);
 
 router
     .route('/:id')

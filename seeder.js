@@ -83,6 +83,7 @@ const seedGames = async(gameData) => {
         info.team1 = team1;
         info.team2 = team2;
         info.seasonInfo = seasonInfo;
+        info.league = leagueId;
 
         // console.log(info);
 
@@ -102,21 +103,26 @@ const seedGames = async(gameData) => {
                 gameInfo.team1.games.push(game._id);
                 gameInfo.team2.games.push(game._id);
                 gameInfo.seasonInfo.games.push(game._id);
+                gameInfo.league.games.push(game._id);
                 
 
                 gameInfo.team1.markModified('games');
                 gameInfo.team2.markModified('games');
                 gameInfo.seasonInfo.markModified('games');
+                gameInfo.league.markModified('games');
 
                 await gameInfo.team1.save();
                 await gameInfo.team2.save();
                 await gameInfo.seasonInfo.save();
+                await gameInfo.league.save();
             }
 
             return game;
 
         } catch (error) {
             console.log(error);
+            console.log(gameInfo);
+            console.log(data);
             //if error creating game return error and continue
             return 'error';
         }
@@ -140,44 +146,84 @@ const seedGames = async(gameData) => {
             if(data.players.length > 1){
                 
                 let players = [];
-
+                let player1Info = {}
                 // if the player is unknown
+                if(data.players[0] === 'unknown'){
+                    unknownPlayerInfo = {
+                        firstName: 'unknown',
+                        lastName: 'unknown'
+                    }
+                    let player1 = await Player.create(unknownPlayerInfo);
+                    player1Info = {
+                        id: player1._id,
+                        firstName: player1.firstName,
+                        lastName: player1.lastName,
+                        position: player1.position,
+                        wins: player1.wins,
+                        losses: player1.losses,
+                        draws: player1.draws,
+                        height: player1.height,
+                        weight: player1.weight,
+                        shoots: player1.shoots
+                    }
+                } else {
+                    let player1 = await Player.findOne({ lastName: data.players[0] })
 
-                // console.log('made it here', playersId)
-                
-                let player1 = await Player.findOne({ lastName: data.players[0] })
+                    // let player1 = await Player.findById(playersId[0]._id);
+                    player1Info = {
+                        id: player1._id,
+                        firstName: player1.firstName,
+                        lastName: player1.lastName,
+                        position: player1.position,
+                        wins: player1.wins,
+                        losses: player1.losses,
+                        draws: player1.draws,
+                        height: player1.height,
+                        weight: player1.weight,
+                        shoots: player1.shoots
+                    }
+                }               
 
-                // let player1 = await Player.findById(playersId[0]._id);
-                let player1Info = {
-                    id: player1._id,
-                    firstName: player1.firstName,
-                    lastName: player1.lastName,
-                    position: player1.position,
-                    wins: player1.wins,
-                    losses: player1.losses,
-                    draws: player1.draws,
-                    height: player1.height,
-                    weight: player1.weight,
-                    shoots: player1.shoots
-                }
                 players.push(player1Info);
+
+                let player2Info = {};
             
-            
-            
-                let player2 = await Player.findOne({ lastName: data.players[1] })
-                // let player2 = await Player.findById(playersId[1]._id);
-                let player2Info = {
-                    id: player2._id,
-                    firstName: player2.firstName,
-                    lastName: player2.lastName,
-                    position: player2.position,
-                    wins: player2.wins,
-                    losses: player2.losses,
-                    draws: player2.draws,
-                    height: player2.height,
-                    weight: player2.weight,
-                    shoots: player2.shoots
+                if(data.players[1] === 'unknown'){
+                    unknownPlayerInfo = {
+                        firstName: 'unknown',
+                        lastName: 'unknown'
+                    }
+                    let player2 = await Player.create(unknownPlayerInfo);
+
+                    player2Info = {
+                        id: player2._id,
+                        firstName: player2.firstName,
+                        lastName: player2.lastName,
+                        position: player2.position,
+                        wins: player2.wins,
+                        losses: player2.losses,
+                        draws: player2.draws,
+                        height: player2.height,
+                        weight: player2.weight,
+                        shoots: player2.shoots
+                    }
+                } else {
+                    let player2 = await Player.findOne({ lastName: data.players[1] })
+                    // let player2 = await Player.findById(playersId[1]._id);
+                    player2Info = {
+                        id: player2._id,
+                        firstName: player2.firstName,
+                        lastName: player2.lastName,
+                        position: player2.position,
+                        wins: player2.wins,
+                        losses: player2.losses,
+                        draws: player2.draws,
+                        height: player2.height,
+                        weight: player2.weight,
+                        shoots: player2.shoots
+                    }
                 }
+            
                 players.push(player2Info);
 
                 fightInfo.players = players;
@@ -212,10 +258,49 @@ const seedGames = async(gameData) => {
             // create fight
             let fight = await Fight.create(fightInfo);
 
+            if(fight){
+                            //add the fight to season/league and players
+                if(fight.players.length > 0){
+                    let player1 = await Player.findById(fight.players[0].id);
+                    let player2 = await Player.findById(fight.players[1].id);
+
+                    player1.fights.push(fight._id);
+                    player2.fights.push(fight._id);
+
+                    player1.markModified('fights');
+                    player2.markModified('fights');
+
+                    await player1.save();
+                    await player2.save();
+                }
+
+                let season = await Season.findById(fight.season.id);
+                let league = await League.findById(fight.league.id);
+                let team1 = await Team.findById(fight.teams[0].id);
+                let team2 = await Team.findById(fight.teams[1].id);
+
+                season.fights.push(fight._id);
+                league.fights.push(fight._id);
+                team1.fights.push(fight._id);
+                team2.fights.push(fight._id);
+
+                season.markModified('fights');
+                league.markModified('fights');
+                team1.markModified('fights');
+                team2.markModified('fights');
+
+                await season.save();
+                await league.save();
+                await team1.save();
+                await team2.save();
+            }
+
+
             return fight;
 
         } catch (error) {
             console.log(error);
+            console.log(fightInfo);
             return 'error';
         }
     }
@@ -364,6 +449,14 @@ const seedPlayers = async(players) => {
             if(player.shoots !== 'L' || player.shoots !== 'R'){
                 player.shoots = '';
             }
+
+            if(player.shoots === 'L'){
+                player.shoots = 'Left';
+            }
+
+            if(player.shoots === 'R'){
+                player.shoots = 'Right';
+            }
             
             await Player.create(player);
             console.log(`Player ${i} of ${players.length} seeded`);
@@ -497,6 +590,32 @@ const deleteComments = async() => {
     }  
 }
 
+const deleteLeagues = async() => {
+    await connectDB();
+
+    try {
+        await League.deleteMany();
+
+        console.log('Leagues deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error);
+    }  
+}
+
+const deleteSeasons = async() => {
+    await connectDB();
+
+    try {
+        await Season.deleteMany();
+
+        console.log('Seasons deleted');
+        process.exit();
+    } catch (error) {
+        console.log(error);
+    }  
+}
+
 if(process.argv[2] === '-seedFights'){
     const fights = JSON.parse(fs.readFileSync(`${__dirname}/_data/fights.json`, 'utf-8'));
     seedFights(fights);
@@ -517,7 +636,7 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/nhl_96_97.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/test_data.json`, 'utf-8'));
     seedGames(games);
 } else if(process.argv[2] === '-deleteGames'){
     deleteGames();
@@ -525,4 +644,8 @@ if(process.argv[2] === '-seedFights'){
     deleteFights();
 } else if(process.argv[2] === '-deleteComments') {
     deleteComments();
+} else if(process.argv[2] === '-deleteSeasons') {
+    deleteSeasons();
+} else if(process.argv[2] === '-deleteLeagues') {
+    deleteLeagues();
 }

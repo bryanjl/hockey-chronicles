@@ -21,10 +21,11 @@ const connectDB = async() => {
 
 const seedSeasons = async () => {
     await connectDB();
-    for(let i = 1960; i <= 2022; i++){
+    for(let i = 1900; i <= 2022; i++){
         await Season.create({ season: `${i}-${i+1}` });
         console.log(`${2022 - i} seasons remaining`);
     }
+    process.exit();
 }
 
 const deleteSeasons = async () => {

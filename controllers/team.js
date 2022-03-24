@@ -4,6 +4,8 @@ const asyncHandler = require('../middleware/async');
 //models
 const League = require('../models/League');
 const Team = require('../models/Team');
+const Fight = require('../models/Fight');
+const Game = require('../models/Game');
 
 //@desc     Get all Teams
 //@route    GET /api/v1/teams/
@@ -22,7 +24,20 @@ exports.getTeam = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Team with ID ${req.params.id} Not Found`, 404));
     }
 
-    sendPopulatedResponse(team, 200, res);
+    let reqResObj = {
+        req,
+        res
+    }
+
+    if(req.query.season){
+        sendPopulatedResponse(reqResObj, team, 200);
+    } else {
+        res.status(200).json({
+            success: true,
+            data: team
+        });
+    }
+    
 });
 
 //@desc     Search teams by city
@@ -106,6 +121,7 @@ exports.updateTeam = asyncHandler(async (req, res, next) => {
     sendPopulatedResponse(team, 200, res);
 });
 
+
 //@desc     Delete a team by ID
 //@route    DELETE /api/v1/teams/:id
 //@access   Private - SUPER-ADMIN
@@ -124,43 +140,32 @@ exports.deleteTeam = asyncHandler(async (req, res, next) => {
     });
 }); 
 
-const sendPopulatedResponse = asyncHandler(async function (team, statusCode, res){
-    team = await Team.findById(team._id)
-        .populate([
-            {
-                path: 'league',
-                select: 'name'
-            },
-            {
-                path: 'fights',
-                populate: [
-                    { 
-                        path: 'teams', 
-                        select: 'name city'
-                    },
-                    {
-                        path: 'players',
-                        select: 'lastName firstName'
-                 
-                    },
-                    {
-                        path: 'league',
-                        select: 'name'
-                    },
-                    {
-                        path: 'season',
-                        select: 'season'
-                    }
-                ]
-            },
-            {
-                path: 'games',
-                select: 'date gameType league season teams fights'
-            }
-        ]);
+const sendPopulatedResponse = asyncHandler(async function (reqResObj, team, statusCode){
 
-    res.status(statusCode).json({
-        success: true,  
-        data: team
+    //Must send season (1960-1961) to get populated response
+    let fightDocumentArray = await Fight.find({
+        '_id': { $in: 
+            team.fights
+        },
+        'season.season': reqResObj.req.query.season
+    }).sort({'date': 1});
+
+    //Get games
+    let gameDocumentArray = await Game.find({
+        '_id': { $in: 
+            team.games
+        },
+        'season.season': reqResObj.req.query.season
+    }).sort({'date': 1});
+
+    team = await Team.findById(team._id).select('-games -fights');
+
+    reqResObj.res.status(statusCode).json({
+        success: true,
+        data: {
+            team,
+            fights: fightDocumentArray,
+            games: gameDocumentArray
+        }  
     });
 });

@@ -25,7 +25,7 @@ router
     .route('/')
     .get(simpleSearch(Team, 'city', ['city', 'name', 'fullName']), getAllTeams)
     .post(upload.single('teamImg'), createTeam);
-
+    
 router  
     .route('/search')
     .get(teamSearch);

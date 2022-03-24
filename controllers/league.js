@@ -1,5 +1,7 @@
 const asyncHandler = require('../middleware/async');
 const League = require('../models/League');
+const Fight = require('../models/Fight');
+const Game = require('../models/Game');
 const ErrorResponse = require('../utils/ErrorResponse');
 
 //@desc     Get all leagues
@@ -17,8 +19,21 @@ exports.getLeague = asyncHandler(async (req, res, next) => {
     if(!league){
         return next(new ErrorResponse(`League with ID of ${req.params.id} Not Found`, 404));
     }
-    
-    sendPopulatedResponse(league, 200, res);
+
+    let reqResObj = {
+        req,
+        res
+    }
+
+    if(req.query.season){
+        sendPopulatedResponse(reqResObj, league, 200);
+    } else {
+        res.status(200).json({
+            success: true,
+            data: league
+        });
+    }
+
 });
 
 //@desc     Create a league
@@ -75,31 +90,31 @@ exports.deleteLeague = asyncHandler(async (req, res, next) => {
     });
 });
 
-const sendPopulatedResponse = asyncHandler(async function (league, statusCode, res){
-    league = await League.findById(league._id)
-        .populate({
-            path: 'fights', 
-            populate: [{ 
-                path: 'teams', 
-                select: 'name city'
-            },
-            {
-                path: 'players',
-                select: 'lastName firstName'
-                 
-            },
-            {
-                path: 'league',
-                select: 'name'
-            },
-            {
-                path: 'season',
-                select: 'season'
-            }]
-        });
+const sendPopulatedResponse = asyncHandler(async function (reqResObj, league, statusCode){
+  //Must send season (1960-1961) to get populated response
+    let fightDocumentArray = await Fight.find({
+        '_id': { $in: 
+            league.fights
+        },
+        'season.season': reqResObj.req.query.season
+    }).sort({'date': 1});
 
-    res.status(statusCode).json({
+    //Get games
+    let gameDocumentArray = await Game.find({
+        '_id': { $in: 
+            league.games
+        },
+        'season.season': reqResObj.req.query.season
+    }).sort({'date': 1});
+
+    league = await League.findById(league._id).select('-games -fights');
+
+    reqResObj.res.status(statusCode).json({
         success: true,
-        data: league
+        data: {
+            league,
+            fights: fightDocumentArray,
+            games: gameDocumentArray
+        }  
     });
 });

@@ -42,21 +42,36 @@ exports.teamSearch = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/teams/
 //@access   Private - logged in user
 exports.createTeam = asyncHandler(async (req, res, next) => {
-    let league = await League.findOne({ name: req.body.league.toUpperCase() });
-    if(!league){
-        return next(new ErrorResponse(`League ${req.body.league} Not found`, 400));
+    console.log('hello');
+    console.log(req.body)
+
+    try {
+        // delete req.body.teamImg;
+        
+    
+        let league = await League.findOne({ name: req.body.league.toUpperCase() });
+        if(!league){
+            return next(new ErrorResponse(`League ${req.body.league} Not found`, 400));
+        }
+    
+        req.body.league = {
+            id: league._id.toString(),
+            name: league.name
+        }
+    
+        // if(req.body.teamImg !== undefined){
+        //     req.body.teamImageFile = req.file.path;
+        // }
+        
+    
+        let team = await Team.create(req.body);
+    
+        sendPopulatedResponse(team, 200, res);
+    } catch (error) {
+        console.log(error);
     }
 
-    req.body.league = {
-        id: league._id.toString(),
-        name: league.name
-    }
 
-    req.body.teamImageFile = req.file.path;
-
-    let team = await Team.create(req.body);
-
-    sendPopulatedResponse(team, 200, res);
 });
 
 //@desc     Update a team

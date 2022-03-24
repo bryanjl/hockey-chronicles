@@ -1,7 +1,7 @@
 const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req, res, next) => {
     //Pagination
     const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 25;
+    const limit = parseInt(req.query.limit, 10) || 50;
     const startIndex = (page - 1) * limit;
     const endIndex = page * limit;
     
@@ -34,11 +34,20 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
     }
     
     //get the total results with no limit
-    let result = await model.aggregate(query);
+    // let result = await model.aggregate(query);
     //add totals to pagination
-    let totalDocuments = result.length;
+     let totalDocuments;
+    if(!req.query.term){
+        totalDocuments = await model.count();
+    } else {
+        let result = await model.aggregate(query);
+        totalDocuments = result.length
+    }
+    
+
     pagination.totalDocuments = totalDocuments;
     pagination.totalPages = Math.ceil(totalDocuments / limit);
+    
 
     let sort = {};
     sort.$sort = {};
@@ -53,9 +62,16 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
     ]);
 
     // console.log(query);
-    
-    // get query results with limit
     result = await model.aggregate(query);
+
+    // if(!req.query.term){
+    //     totalDocuments = await model.count();
+    // } else {
+    //     totalDocuments = result.length;
+    // }
+
+    // get query results with limit
+    
 
     // console.log('here', populate);
 

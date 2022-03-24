@@ -17,6 +17,12 @@ const Comment = require('../models/Comment');
 exports.getAllFights = asyncHandler(async (req, res, next) => {
     //use advanced results middleware to paginate and process filtering
     res.status(200).json(res.advancedResults);
+    // let fights = await Fight.find();
+
+    // res.status(200).json({
+    //     success: true,
+    //     data: fights
+    // })
 });
 
 

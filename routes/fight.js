@@ -30,6 +30,8 @@ router
     .get(advancedResults(Fight, 'date', 'fights'), getAllFights)
     .post(createFight);
 
+     
+
 router
     .route('/topfive')
     .get(topFive(Fight), topFiveMostFights);

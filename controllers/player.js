@@ -3,6 +3,7 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/ErrorResponse');
 //models
 const Player = require('../models/Player');
+const Fight = require('../models/Fight');
 
 //@desc     Get all Players
 //@route    GET /api/v1/players/
@@ -21,8 +22,13 @@ exports.getPlayer = asyncHandler(async (req, res, next) => {
     if(!player){
         return next(new ErrorResponse(`Player with ID of ${req.params.id} not found`, 404));
     }
+
+    let reqResObj = {
+        req,
+        res
+    }
     
-    sendPopulatedResponse(player, 200, res);
+    sendPopulatedResponse(reqResObj, player, 200);
 });
 
 //@desc     Search players by lastName 
@@ -96,31 +102,59 @@ exports.deletePlayer = asyncHandler(async (req, res, next) => {
     });
 }); 
 
-const sendPopulatedResponse = asyncHandler(async function (player, statusCode, res){
-    player = await Player.findById(player._id)
-        .populate({
-            path: 'fights', 
-            populate: [{ 
-                path: 'teams', 
-                select: 'name city'
-            },
-            {
-                path: 'players',
-                select: 'lastName firstName'
+const sendPopulatedResponse = asyncHandler(async function (reqResObj, player, statusCode){
+    // player = await Player.findById(player._id)
+    //     .populate({
+    //         path: 'fights', 
+    //         populate: [{ 
+    //             path: 'teams', 
+    //             select: 'name city'
+    //         },
+    //         {
+    //             path: 'players',
+    //             select: 'lastName firstName'
                  
-            },
-            {
-                path: 'league',
-                select: 'name'
-            },
-            {
-                path: 'season',
-                select: 'season'
-            }]
-        });
+    //         },
+    //         {
+    //             path: 'league',
+    //             select: 'name'
+    //         },
+    //         {
+    //             path: 'season',
+    //             select: 'season'
+    //         }]
+    //     });
 
-    res.status(statusCode).json({
-        success: true,
-        data: player
+        //Must send season (1960-1961) to get populated response
+    let fightDocumentArray = await Fight.find({
+            '_id': { $in: 
+                player.fights
+            },
+            // 'season.season': reqResObj.req.query.season
+        }).sort({'date': 1});
+    
+        //Get games
+        // let gameDocumentArray = await Game.find({
+        //     '_id': { $in: 
+        //         player.games
+        //     },
+        //     // 'season.season': reqResObj.req.query.season
+        // }).sort({'date': 1});
+    
+        player = await Player.findById(player._id).select('-games -fights');
+    
+        reqResObj.res.status(statusCode).json({
+            success: true,
+            data: {
+                player,
+                fights: fightDocumentArray,
+                // games: gameDocumentArray
+            }  
+        });
     });
-});
+
+//     res.status(statusCode).json({
+//         success: true,
+//         data: player
+//     });
+// });

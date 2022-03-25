@@ -12,21 +12,59 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
 
     let query = [];
 
-    if(req.query.term) {
+    // console.log(req.query);
+
+    if(req.query.season && !req.query.league){
         query = [
             {
-                $search: {
-                    index: searchIndex,
-                    text: {
-                        query: `${req.query.term}`,
-                        path: {
-                            wildcard: `${req.query.path || ''}*`
-                        }
-                    }
+              '$search': {
+                'index': 'fights',
+                'text': {
+                  'query': req.query.season,
+                  'path': {
+                    'wildcard': 'season*'
+                  }
                 }
-            },
-            
+              }
+            }
+          ]
+    } else if(req.query.season && req.query.league){
+        query = [
+            {
+              '$search': {
+                'index': 'fights',
+                'text': {
+                  'query': req.query.season,
+                  'path': {
+                    'league': '*',
+                    'season': '*'
+                  }
+                }
+              }
+            }
+          ]
+    } else if(req.query.league && !req.query.season){
+        query = [
+            {
+                $match: {
+                    'league.name': req.query.league
+                }
+            }
         ]
+    } else if(req.query.term){
+        query = [
+            {
+              '$search': {
+                'index': 'fights',
+                'text': {
+                  'query': req.query.term,
+                  'path': {
+                    'wildcard': '*'
+                  }
+                }
+              }
+            }
+          ]
     } else {
         query = [
             {$match: {}}
@@ -37,7 +75,7 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
     // let result = await model.aggregate(query);
     //add totals to pagination
      let totalDocuments;
-    if(!req.query.term){
+    if(!req.query.season && !req.query.league && !req.query.term){
         totalDocuments = await model.count();
     } else {
         let result = await model.aggregate(query);

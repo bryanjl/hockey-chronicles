@@ -12,77 +12,104 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
 
   let query = [];
 
-  if(req.query.season && !req.query.league){
-    query = [
-      {
-        '$search': {
-          'index': 'fights',
-          'phrase': {
-            
-              'query': req.query.season,
-              'path': 'season.season',
-              // 'allowAnalyzedField': true
-            },
-
-        }
-      }
-    ]
-  } else if(req.query.season && req.query.league){
-    query = [
-      {
-        '$search': {
-          'index': 'fights',
-          'compound': {
-            'must': [
-              {
-                'phrase': {
-                  'query': req.query.season,
-                  'path': 'season.season',
-                }
+  if(searchIndex === 'default'){
+    if(req.query.term) {
+      query = [
+        {
+          '$search': {
+            'index': 'default',
+            'text': {
+              'query': req.query.term,
+              'path': {
+                'wildcard': '*'
               },
-              {
-                'phrase': {
-                  'query': req.query.league,
-                  'path': 'league.name'
-                }
-              }
-            ]
-          }
-        }
-      }
-    ]
-  } else if(req.query.league && !req.query.season){
-    query = [
-      {
-        '$search': {
-          'index': 'fights',
-          'phrase': {
-            
-              'query': req.query.league,
-              'path': 'league.name'
-              // 'allowAnalyzedField': true
-            }, 
-        }
-      }
-    ]
-  } else if(req.query.term){
-    query = [
-      {
-        '$search': {
-          'index': 'fights',
-          'text': {
-            'query': req.query.term,
-            'path': {
-              'wildcard': '*'
+              'fuzzy': {}
             }
           }
         }
-      }
-    ]
-  } else {
-    query = [
+      ]
+    } else {
+      query = [
         {$match: {}}
-    ]
+      ]
+    }
+  }
+
+  if(searchIndex === 'fights'){
+
+    if(req.query.season && !req.query.league){
+      query = [
+        {
+          '$search': {
+            'index': 'fights',
+            'phrase': {
+              
+                'query': req.query.season,
+                'path': 'season.season',
+                // 'allowAnalyzedField': true
+              },
+
+          }
+        }
+      ]
+    } else if(req.query.season && req.query.league){
+      query = [
+        {
+          '$search': {
+            'index': 'fights',
+            'compound': {
+              'must': [
+                {
+                  'phrase': {
+                    'query': req.query.season,
+                    'path': 'season.season',
+                  }
+                },
+                {
+                  'phrase': {
+                    'query': req.query.league,
+                    'path': 'league.name'
+                  }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    } else if(req.query.league && !req.query.season){
+      query = [
+        {
+          '$search': {
+            'index': 'fights',
+            'phrase': {
+              
+                'query': req.query.league,
+                'path': 'league.name'
+                // 'allowAnalyzedField': true
+              }, 
+          }
+        }
+      ]
+    } else if(req.query.term){
+      query = [
+        {
+          '$search': {
+            'index': 'fights',
+            'text': {
+              'query': req.query.term,
+              'path': {
+                'wildcard': '*'
+              },
+              'fuzzy': {}
+            }
+          }
+        }
+      ]
+    } else {
+      query = [
+          {$match: {}}
+      ]
+    }
   }
   
   //get the total results with no limit

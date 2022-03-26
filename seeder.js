@@ -38,7 +38,7 @@ const seedGames = async(gameData) => {
             
             //set teams
             let teams = [];
-            let team1 = await Team.findOne({ city: data.teams[0] });
+            let team1 = await Team.findOne({ city: data.teams[0], "league.name": 'AHL' });
             let team1Info = {
                 id: team1._id,
                 city: team1.city,
@@ -47,7 +47,7 @@ const seedGames = async(gameData) => {
             }
             teams.push(team1Info);
     
-            let team2 = await Team.findOne({ city: data.teams[1] });
+            let team2 = await Team.findOne({ city: data.teams[1], "league.name": 'AHL' });
             let team2Info = {
                 id: team2._id,
                 city: team2.city,
@@ -456,6 +456,7 @@ const seedPlayers = async(players) => {
     try {
         let i = 1;
         for(let player of players){
+            console.log(`Player ${i} of ${players.length} seeding`);
             let actionRating = {
                 average: 0,
                 votes: 0
@@ -473,10 +474,18 @@ const seedPlayers = async(players) => {
             if(player.shoots === 'R'){
                 player.shoots = 'Right';
             }
+
+            let checkPlayer = await Player.find({firstName: player.firstName, lastName: player.lastName})
             
-            await Player.create(player);
-            console.log(`Player ${i} of ${players.length} seeded`);
             i++;
+
+            if(checkPlayer.length === 0) {
+                await Player.create(player);
+            } else {
+                
+                console.log('same player');
+                continue;
+            }
         }
         process.exit();
     } catch (error) {
@@ -532,7 +541,11 @@ const seedTeams = async(teams) => {
                 name: league.name
             }
 
-            await Team.create(team);
+            
+                await Team.create(team);
+            
+
+            
 
             console.log(`Team ${i} of ${teams.length} seeded`);
             i++;
@@ -636,7 +649,7 @@ if(process.argv[2] === '-seedFights'){
     const fights = JSON.parse(fs.readFileSync(`${__dirname}/_data/fights.json`, 'utf-8'));
     seedFights(fights);
 } else if(process.argv[2] === '-seedPlayers'){
-    const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHL.json`, 'utf-8'));
+    const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/AHL.json`, 'utf-8'));
     seedPlayers(players);
 } else if(process.argv[2] === '-seedLeagues'){
     const leagues = JSON.parse(fs.readFileSync(`${__dirname}/_data/leagues.json`, 'utf-8'));
@@ -645,14 +658,14 @@ if(process.argv[2] === '-seedFights'){
     const seasons = JSON.parse(fs.readFileSync(`${__dirname}/_data/seasons.json`, 'utf-8'));
     seedSeasons(seasons);
 } else if(process.argv[2] === '-seedTeams'){
-    const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHLteams.json`, 'utf-8'));
+    const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/AHLteams.json`, 'utf-8'));
     seedTeams(teams);
 } else if(process.argv[2] === '-deleteTeams'){
     deleteTeams();
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/partly_compiled_data_70-80.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/AHL 82-83.json`, 'utf-8'));
     seedGames(games);
 } else if(process.argv[2] === '-deleteGames'){
     deleteGames();

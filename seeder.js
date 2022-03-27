@@ -677,4 +677,5 @@ if(process.argv[2] === '-seedFights'){
     deleteSeasons();
 } else if(process.argv[2] === '-deleteLeagues') {
     deleteLeagues();
-}
+}//
+//

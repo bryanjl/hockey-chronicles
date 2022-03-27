@@ -41,7 +41,9 @@ if(process.env.NODE_ENV === 'development'){
 app.use('/uploads', express.static('uploads'));
 
 //cors -> used in production??
-app.use(cors());
+app.use(cors({
+    origin: true
+}));
 
 //body parser
 app.use(express.json());

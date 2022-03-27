@@ -23,7 +23,7 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
               'path': {
                 'wildcard': '*'
               },
-              'fuzzy': {}
+              // 'fuzzy': {}
             }
           }
         }

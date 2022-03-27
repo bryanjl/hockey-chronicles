@@ -665,7 +665,7 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHL 80-81.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHL 77-78.json`, 'utf-8'));
     seedGames(games);
 } else if(process.argv[2] === '-deleteGames'){
     deleteGames();

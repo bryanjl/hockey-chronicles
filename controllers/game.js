@@ -15,11 +15,10 @@ const Comment = require('../models/Comment');
 //@route    GET /api/v1/games
 //@access   Public
 exports.getAllGames = asyncHandler(async (req, res,next) => {
-    res.writeHead(200, '', {
-        "Access-Control-Allow-Origin": "https://hockey-chronicles-r3lzq.ondigitalocean.app",
-        "Access-Control-Allow-Headers": "*, Authorization",
-        "Access-Control-Allow-Methods": "OPTIONS, GET, PUT, DELETE, POST, HEAD"
-    }).json(res.gameSearch);
+    res
+        .status(200)
+        .setHeader('Access-Control-Allow-Origin', '*')
+        .json(res.gameSearch);
 });
 
 //@desc     Create a new game

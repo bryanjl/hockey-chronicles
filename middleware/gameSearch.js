@@ -57,19 +57,10 @@ const gameSearch = () => async(req, res, next)=> {
     //add sort and limit to the query
     query = query.concat([
         sort,
-        {$limit: 1200}
+        {$limit: 50}
     ]);
 
-    let results = await Game.aggregate(query);
-    
-    // res.setHeader("Access-Control-Allow-Origin", 'https://hockey-chronicles-r3lzq.ondigitalocean.app')
-    // // res.header("Access-Control-Allow-Origin", '*');
-    //     .setHeader("Access-Control-Allow-Credentials", true)
-    //     .setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, DELETE, POST, HEAD')
-    //     .setHeader('Access-Control-Allow-Headers', '*, Authorization')
-    //     .setHeader('Access-Control-Request-Headers', '*, Authorization')
-    //     .writeHead(200, {'Content-Type': 'application/json'});
-  
+    let results = await Game.aggregate(query);  
 
     res.gameSearch = {
         success: true,

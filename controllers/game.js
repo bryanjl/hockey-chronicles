@@ -17,9 +17,10 @@ const Comment = require('../models/Comment');
 exports.getAllGames = asyncHandler(async (req, res,next) => {
     // res
     res
+        .setHeader('Access-Control-Allow-Origin', '*')
         .status(200)
-        .json(res.gameSearch)
-        .setHeader('Access-Control-Allow-Origin', '*');
+        .json(res.gameSearch);
+        
 });
 
 //@desc     Create a new game

@@ -16,9 +16,9 @@ const Comment = require('../models/Comment');
 //@access   Public
 exports.getAllGames = asyncHandler(async (req, res,next) => {
     // res
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Origin', 'https://hockey-chronicles-r3lzq.ondigitalocean.app');
        
-    res.json(res.gameSearch);
+    res.send(res.gameSearch);
         
 });
 

@@ -23,7 +23,7 @@ exports.getAllGames = asyncHandler(async (req, res,next) => {
         .setHeader('Access-Control-Allow-Headers', '*, Authorization')
         .setHeader('Access-Control-Request-Headers', '*, Authorization')
        
-        .send(res.gameSearch);
+        .end(JSON.stringify(res.gameSearch));
         
 });
 

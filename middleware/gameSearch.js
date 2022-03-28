@@ -62,12 +62,7 @@ const gameSearch = () => async(req, res, next)=> {
 
     let results = await Game.aggregate(query);
     
-    res.setHeader("Access-Control-Allow-Origin", 'https://hockey-chronicles-r3lzq.ondigitalocean.app');
-    // res.header("Access-Control-Allow-Origin", '*');
-    res.setHeader("Access-Control-Allow-Credentials", true);
-    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, DELETE, POST, HEAD');
-    res.setHeader('Access-Control-Allow-Headers', '*, Authorization');
-    res.setHeader('Access-Control-Request-Headers', '*, Authorization');
+  
 
     res.gameSearch = {
         success: true,

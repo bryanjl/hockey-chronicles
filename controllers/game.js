@@ -22,9 +22,9 @@ exports.getAllGames = asyncHandler(async (req, res,next) => {
         .setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, DELETE, POST, HEAD')
         .setHeader('Access-Control-Allow-Headers', '*, Authorization')
         .setHeader('Access-Control-Request-Headers', '*, Authorization')
-        .setHeader('Content-Type', 'application/json')
+        .writeHead(200, {'Content-Type': 'application/json'})
        
-        .send(JSON.stringify(res.gameSearch));
+        .end(JSON.stringify(res.gameSearch));
         
 });
 

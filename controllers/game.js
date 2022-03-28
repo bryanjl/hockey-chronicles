@@ -16,10 +16,9 @@ const Comment = require('../models/Comment');
 //@access   Public
 exports.getAllGames = asyncHandler(async (req, res,next) => {
     // res
-    res
-        .setHeader('Access-Control-Allow-Origin', '*')
-        .status(200)
-        .json(res.gameSearch);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+       
+    res.json(res.gameSearch);
         
 });
 

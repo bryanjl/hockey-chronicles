@@ -18,7 +18,7 @@ const gameSearch = () => async(req, res, next)=> {
         ];
     } 
 
-    if(req.query.season && !req.query.league){
+    else if(req.query.season && !req.query.league){
         query = [
             {
                 $match: {
@@ -31,7 +31,7 @@ const gameSearch = () => async(req, res, next)=> {
         ];
     }
 
-    if(req.query.league && !req.query.season){
+    else if(req.query.league && !req.query.season){
         query = [
             {
                 $match: {
@@ -42,6 +42,12 @@ const gameSearch = () => async(req, res, next)=> {
                 }
             }
         ];
+    } else {
+        query = [
+            {
+                $match: {}
+            }
+        ]
     }
 
     //sort by date

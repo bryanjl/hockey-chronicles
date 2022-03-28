@@ -33,7 +33,7 @@ const errorHandler = (err, req, res, next) => {
         .status(error.statusCode || 500)
         .json({
             success: false,
-            msg: error.message || 'Server Error',
+            msg: error || 'Server Error',
             formField: error.formField
         });
 }

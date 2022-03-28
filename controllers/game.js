@@ -16,7 +16,12 @@ const Comment = require('../models/Comment');
 //@access   Public
 exports.getAllGames = asyncHandler(async (req, res,next) => {
     // res
-    res.setHeader('Access-Control-Allow-Origin', 'https://hockey-chronicles-r3lzq.ondigitalocean.app');
+    res.header("Access-Control-Allow-Origin", 'https://hockey-chronicles-r3lzq.ondigitalocean.app');
+    // res.header("Access-Control-Allow-Origin", '*');
+    res.header("Access-Control-Allow-Credentials", true);
+    res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, DELETE, POST, HEAD');
+    res.header('Access-Control-Allow-Headers', '*, Authorization');
+    res.header('Access-Control-Request-Headers', '*, Authorization');
        
     res.send(res.gameSearch);
         

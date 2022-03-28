@@ -24,7 +24,7 @@ exports.getAllGames = asyncHandler(async (req, res,next) => {
         .setHeader('Access-Control-Request-Headers', '*, Authorization')
         .setHeader('Content-Type', 'application/json')
        
-        .end(JSON.stringify(res.gameSearch));
+        .send(JSON.stringify(res.gameSearch));
         
 });
 

@@ -21,7 +21,7 @@ const router = express.Router();
 
 router 
     .route('/')
-    .get(gameSearch(), getAllGames) 
+    .get(advancedResults(Game, 'date', 'games'), getAllGames) 
     .post(createGame);
     // fightCreate,  <---in post route????
 router

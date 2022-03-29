@@ -35,13 +35,13 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
     }
   }
 
-  if(searchIndex === 'fights'){
+  if(searchIndex === 'fights' || searchIndex === 'games'){
 
     if(req.query.season && !req.query.league){
       query = [
         {
           '$search': {
-            'index': 'fights',
+            'index': searchIndex,
             'phrase': {
               
                 'query': req.query.season,
@@ -56,7 +56,7 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
       query = [
         {
           '$search': {
-            'index': 'fights',
+            'index': searchIndex,
             'compound': {
               'must': [
                 {
@@ -80,7 +80,7 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
       query = [
         {
           '$search': {
-            'index': 'fights',
+            'index': searchIndex,
             'phrase': {
               
                 'query': req.query.league,
@@ -94,7 +94,7 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
       query = [
         {
           '$search': {
-            'index': 'fights',
+            'index': searchIndex,
             'text': {
               'query': req.query.term,
               'path': {
@@ -120,7 +120,7 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
       totalDocuments = await model.count();
   } else {
       let result = await model.aggregate(query);
-      totalDocuments = result.length
+      totalDocuments = result.length;
   }
   
 

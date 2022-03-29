@@ -16,7 +16,7 @@ const Comment = require('../models/Comment');
 //@access   Public
 exports.getAllGames = asyncHandler(async (req, res, next) => {
     // res 
-    res.status(200).json(res.gameSearch);
+    res.status(200).json(res.advancedResults);
 });
 
 //@desc     Create a new game

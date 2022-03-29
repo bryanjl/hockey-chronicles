@@ -41,22 +41,22 @@ if(process.env.NODE_ENV === 'development'){
 app.use('/uploads', express.static('uploads'));
 
 //cors -> used in production??
-// app.use(cors({
-//     origin: true,
-//     credentials: true
-// }));
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 
-app.use('/api/v1/', function(req, res, next) {
-    // res.header("Access-Control-Allow-Origin", 'https://hockey-chronicles-r3lzq.ondigitalocean.app');
-    res.header("Access-Control-Allow-Origin", '*');
-    res.header("Access-Control-Allow-Credentials", true);
-    res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, DELETE, POST, HEAD');
-    res.header('Access-Control-Allow-Headers', '*, Authorization');
-    res.header('Access-Control-Request-Headers', '*, Authorization');
-    // res.header("Access-Control-Allow-Headers", 'Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, application/json, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers');
-    // res.header("Access-Control-Request-Headers", 'Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, application/json, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers');
-    next();
-});
+// app.use('/api/v1/', function(req, res, next) {
+//     // res.header("Access-Control-Allow-Origin", 'https://hockey-chronicles-r3lzq.ondigitalocean.app');
+//     res.header("Access-Control-Allow-Origin", '*');
+//     res.header("Access-Control-Allow-Credentials", true);
+//     res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, PUT, DELETE, POST, HEAD');
+//     res.header('Access-Control-Allow-Headers', '*, Authorization');
+//     res.header('Access-Control-Request-Headers', '*, Authorization');
+//     // res.header("Access-Control-Allow-Headers", 'Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, application/json, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers');
+//     // res.header("Access-Control-Request-Headers", 'Access-Control-Allow-Headers, Origin, X-Requested-With, Content-Type, Accept, application/json, Authorization, Access-Control-Request-Method, Access-Control-Request-Headers');
+//     next();
+// });
 
 // response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
 

@@ -21,3 +21,34 @@ exports.getAllUsers = asyncHandler(async (req, res, next) => {
         data: users
     });
  });
+
+//@desc     Set user Role
+//@route    PUT /api/v1/admin/users/:id
+//@access   Private - must have 'super' role
+exports.updateUserRole = asyncHandler(async (req, res, next) => {
+    if(req.user.role !== 'super'){
+        return next(new ErrorResponse(`Not authorized for this route`, 401));
+    }
+
+    let user = await User.findByIdAndUpdate(req.params.id, req.body, {new: true});
+
+    res.status(200).json({
+        success: true,
+        data: user
+    });
+ });
+
+//@desc     Delete a user
+//@route    DELETE /api/v1/admin/users/:id
+//@access   Private - must have 'super' role
+exports.deleteUser = asyncHandler(async (req, res, next) => {
+    if(req.user.role !== 'super'){
+        return next(new ErrorResponse(`Not authorized for this route`, 401));
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+        success: true,
+    });
+ });

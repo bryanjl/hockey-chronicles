@@ -269,8 +269,12 @@ exports.getFeaturedFight = asyncHandler(async(req, res, next) => {
 
 //@desc     Set the featured fight
 //@route    PUT /api/v1/fights/featuredfight
-//@access   Public
+//@access   Private - must be 'super' or 'admin'
 exports.setFeaturedFight = asyncHandler(async(req, res, next) => {
+    if(req.user.role !== 'super' && req.user.role !== 'admin'){
+        return next(new ErrorResponse(`Not authorized for this route`, 401));
+    }
+
     let fight = await Fight.findOne({ featuredFight: true });
 
     if(fight){

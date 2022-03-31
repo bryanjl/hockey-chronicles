@@ -22,6 +22,7 @@ const Fight = require('../models/Fight');
 const advancedResults = require('../middleware/advancedResults');
 const { updatePlayerData } = require('../middleware/updatePlayerData');
 const topFive = require('../middleware/topFive');
+const { protect } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -39,7 +40,7 @@ router
 router  
     .route('/featuredfight')
     .get(getFeaturedFight)
-    .put(setFeaturedFight);
+    .put(protect, setFeaturedFight);
 
 router
     .route('/:id')

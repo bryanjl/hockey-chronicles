@@ -15,24 +15,33 @@ exports.getAllLeagues = asyncHandler(async (req, res, next) => {
 //@route    GET /api/v1/league/:id
 //@access   Public
 exports.getLeague = asyncHandler(async (req, res, next) => {
-    let league = await League.findById(req.params.id);
+    let league = await League.findById(req.params.id).select('-games -fights');
     if(!league){
         return next(new ErrorResponse(`League with ID of ${req.params.id} Not Found`, 404));
     }
 
-    let reqResObj = {
-        req,
-        res
-    }
+    res.status(200).json({
+        success: true,
+        data: league
+    })
 
-    if(req.query.season){
-        sendPopulatedResponse(reqResObj, league, 200);
-    } else {
-        res.status(200).json({
-            success: true,
-            data: league
-        });
-    }
+    // let reqResObj = {
+    //     req,
+    //     res
+    // }
+
+    // if(req.query.season){
+    //     sendPopulatedResponse(reqResObj, league, 200);
+    // } else {
+    //     let data = res.leagueData.data;
+    //     let pagination = res.leaguePagination.pagination;
+    //     res.status(200).json({
+    //         success: true,
+    //         league,
+    //         data,
+    //         pagination
+    //     })
+    // }
 
 });
 

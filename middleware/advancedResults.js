@@ -1,3 +1,5 @@
+const ErrorResponse = require('../utils/ErrorResponse');
+
 const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req, res, next) => {
   //Pagination
   const page = parseInt(req.query.page, 10) || 1;
@@ -111,6 +113,10 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
       ]
     }
   }
+
+  try {
+    
+  
   
   //get the total results with no limit
   // let result = await model.aggregate(query);
@@ -119,8 +125,12 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
   if(!req.query.season && !req.query.league && !req.query.term){
       totalDocuments = await model.count();
   } else {
-      let result = await model.aggregate(query);
-      totalDocuments = result.length;
+      let countQuery = [...query];
+      countQuery.push({
+        $count: 'totalDocuments'
+      })
+      totalDocuments = await model.aggregate(countQuery);
+      totalDocuments = totalDocuments[0].totalDocuments;
   }
   
 
@@ -152,7 +162,11 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
       data: result
   }    
 
-  next();    
+  next();   
+} catch (error) {
+  console.log(error);
+  return next(new ErrorResponse(`Server Error`, 500))
+}
 }
 
 

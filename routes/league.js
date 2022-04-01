@@ -13,6 +13,7 @@ const {
 
 //import middleware
 const advancedResults = require('../middleware/advancedResults');
+const leagueData = require('../middleware/leagueData');
 
 //models
 const League = require('../models/League');
@@ -46,7 +47,7 @@ router
 
 router
     .route('/:id')
-    .get(getLeague)
+    .get(leagueData(), getLeague)
     .put(updateLeague)
     .delete(deleteLeague);
 

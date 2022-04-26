@@ -130,7 +130,12 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
         $count: 'totalDocuments'
       })
       totalDocuments = await model.aggregate(countQuery);
-      totalDocuments = totalDocuments[0].totalDocuments;
+      if(totalDocuments.length === 0) {
+        totalDocuments = 0;
+      } else {
+        totalDocuments = totalDocuments[0].totalDocuments;
+      }
+      
   }
   
 

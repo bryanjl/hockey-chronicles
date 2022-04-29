@@ -1,7 +1,7 @@
 const multer = require('multer');
 const ErrorResponse = require('../utils/ErrorResponse');
 
-const multerImageUpload = function (imageFolder) {
+const multerImageUpload = (imageFolder) => {
     //multer settings
     const storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -10,6 +10,7 @@ const multerImageUpload = function (imageFolder) {
         filename: function (req, file, cb) {
             const uniqueSuffix = Math.round(Math.random() * 1E9);
             cb(null, uniqueSuffix + file.originalname);
+            req.body.teamImageFile = uniqueSuffix + file.originalname;
         }
     });
 
@@ -17,7 +18,7 @@ const multerImageUpload = function (imageFolder) {
         if(file.size > (1024 * 1024 * 3)){
             //file size greater than 3mb
             console.log('too large')
-            cb(new ErrorResponse(`IMage size too large - must be under 3MB`, 400), false);    
+            cb(new ErrorResponse(`Image size too large - must be under 3MB`, 400), false);    
         } else if (file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg'){
             console.log('mimetype')
             console.log(file);

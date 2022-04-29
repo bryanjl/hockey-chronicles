@@ -33,7 +33,7 @@ router
 router
     .route('/:id')
     .get(getTeam)
-    .put(updateTeam)
+    .put(upload.single('teamImg'), updateTeam)
     .delete(deleteTeam);
 
 module.exports = router;

@@ -9,15 +9,12 @@ const asyncHandler = require('../middleware/async');
 //@route    POST /api/v1/auth/register
 //@access   Public
 exports.register = asyncHandler(async (req, res, next) => {
-    const { username, email, password, role } = req.body;
+    // const { username, email, password, role } = req.body;
+
+    req.body.profileImageFile = req.body.imageFile;
 
     //create User
-    const user = await User.create({
-        username,
-        email,
-        password,
-        role
-    });
+    const user = await User.create(req.body);
     //send token
     sendTokenResponse(user, 200, res);
  });
@@ -87,7 +84,8 @@ exports.getMe = asyncHandler(async (req, res, next) => {
 exports.updateDetails = asyncHandler(async (req, res, next) => {
     const fieldsToUpdate = {
         username: req.body.username,
-        email: req.body.email
+        email: req.body.email,
+        profileImageFile: req.body.imageFile
     }
 
     const user = await User.findByIdAndUpdate(req.user.id, fieldsToUpdate, {

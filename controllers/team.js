@@ -107,6 +107,8 @@ exports.updateTeam = asyncHandler(async (req, res, next) => {
             name: league.name
         }
     }
+
+    req.body.teamImageFile =req.body.imageFile;
     
     team = await Team.findByIdAndUpdate(req.params.id, req.body, {new: true});
 

@@ -1,4 +1,7 @@
 const express = require('express');
+const multerImageUpload = require('../middleware/imageUpload');
+const upload = multerImageUpload('users');
+
 const { 
     register, 
     login, 
@@ -16,7 +19,7 @@ const { protect } = require('../middleware/auth');
 
 router
     .route('/register')
-    .post(register);
+    .post(upload.single('profileImageFile'), register);
 
 router
     .route('/login')
@@ -36,7 +39,7 @@ router
 
 router
     .route('/updatedetails')
-    .put(protect, updateDetails);
+    .put(upload.single('profileImageFile'), protect, updateDetails);
 
 router
     .route('/updatepassword')

@@ -10,7 +10,7 @@ const multerImageUpload = (imageFolder) => {
         filename: function (req, file, cb) {
             const uniqueSuffix = Math.round(Math.random() * 1E9);
             cb(null, uniqueSuffix + file.originalname);
-            req.body.teamImageFile = uniqueSuffix + file.originalname;
+            req.body.imageFile = uniqueSuffix + file.originalname;
         }
     });
 

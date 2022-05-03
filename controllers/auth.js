@@ -2,7 +2,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const ErrorResponse = require('../utils/ErrorResponse');
 const asyncHandler = require('../middleware/async');
-// const sendEmail = require('../utils/sendEmail');
+const {sendEmail} = require('../utils/sendEmail');
 
 
 //@desc     Register a user
@@ -124,7 +124,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email});
 
     if(!user) {
-        return next(new ErrorResponse(`There is no user with that email`, 404));
+        return next(new ErrorResponse(`Incorrect Email`, 404));
     }
 
     //get reset token
@@ -132,23 +132,32 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
 
     await user.save({ validateBeforeSave: false });
 
-    //create reset url
-    const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/auth/resetpassword/${resetToken}`;
+    // create reset url
+    const resetUrl = `https://hockey-chronicles-r3lzq.ondigitalocean.app/resetpassword/${resetToken}`;
 
     //create message
-    const message = `You are recieving this email because you (or someone else) has requested the reset of a password.  Please make a PUT request to: ${resetUrl}`;
+    const message = `You are recieving this email because you (or someone else) has requested the reset of a password.  Please visit: ${resetUrl} to change your password`;
+
+    let resetEmail = {
+        from: 'hockey00chronicles@gmail.com',
+        to: user.email,
+        subject: 'Hockey Fight Chronicles Password Reset',
+        text: message
+    }
 
     try {
-        await sendEmail({
-            email: user.email,
-            subject: 'Password reset token',
-            message
-        });
-
-        res.status(200).json({
-            success: true,
-            data: 'Email sent'
+        sendEmail(resetEmail, (err) => {
+            if(err){
+                throw new Error('cannot send email')
+            } else {
+                res.status(200).json({
+                    success: true,
+                    data: 'Email sent'
+                })
+            }
         })
+
+
     } catch (err) {
         console.log(err);
         user.resetPasswordToken = undefined;

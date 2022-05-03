@@ -34,7 +34,7 @@ router
     .get(protect, getMe);
 
 router
-    .route('/forgotPassword')
+    .route('/forgotpassword')
     .post(forgotPassword);
 
 router

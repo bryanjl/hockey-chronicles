@@ -220,10 +220,14 @@ FightSchema.methods.updateOutcome = async function(reqOutcome) {
                     //new loser player gets +1 losses and -1 draws
                     //update field (winner) in outcome obj
                 if(this.outcome.winner === 'draw'){
-                    player1.draws -= 1;
-                    player2.draws -= 1;
-                    player1.markModified('draws');
-                    player2.markModified('draws');
+                    if(player1.draws > 0) {
+                        player1.draws -= 1;
+                        player1.markModified('draws');
+                    }
+                    if(player2.draws > 0){
+                        player2.draws -= 1;
+                        player2.markModified('draws');
+                    }
                     if(reqOutcomeWinner === player1._id.toString()){
                         player1.wins += 1;
                         player2.losses += 1;

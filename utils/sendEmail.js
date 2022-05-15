@@ -1,13 +1,12 @@
 const nodemailer = require('nodemailer');
+const nodemailerSendgrid = require('nodemailer-sendgrid');
 
-let mailTransporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const transport = nodemailer.createTransport(
+    nodemailerSendgrid({
+        apiKey: process.env.SENDGRID_API_KEY
+    })
+);
 
-exports.sendEmail = (message, cb) => {
-    mailTransporter.sendMail(message, cb);
+exports.sendEmail = (message) => {
+    transport.sendMail(message);
 }

@@ -22,7 +22,8 @@ exports.updatePlayerData = asyncHandler(async (req, res, next) => {
             draws: player1.draws,
             height: player1.height,
             weight: player1.weight,
-            shoots: player1.shoots
+            shoots: player1.shoots,
+            teamId: fight.players[0].teamId
         }
         players.push(player1Info);
 
@@ -37,7 +38,8 @@ exports.updatePlayerData = asyncHandler(async (req, res, next) => {
             draws: player2.draws,
             height: player2.height,
             weight: player2.weight,
-            shoots: player2.shoots
+            shoots: player2.shoots,
+            teamId: fight.players[1].teamId
         }
         players.push(player2Info);
         

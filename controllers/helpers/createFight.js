@@ -35,7 +35,8 @@ exports.createFight = asyncHandler(async (req) => {
             draws: player1.draws,
             height: player1.height,
             weight: player1.weight,
-            shoots: player1.shoots
+            shoots: player1.shoots,
+            teamId: req.body.players[0].teamId
         }
         let player2 = await Player.findById(req.body.players[1]._id);
         if(!player2){
@@ -51,7 +52,8 @@ exports.createFight = asyncHandler(async (req) => {
             draws: player2.draws,
             height: player2.height,
             weight: player2.weight,
-            shoots: player2.shoots
+            shoots: player2.shoots,
+            teamId: req.body.players[1].teamId
         }
         players.push(player1Info);
         players.push(player2Info);

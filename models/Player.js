@@ -20,6 +20,18 @@ const PlayerSchema = new mongoose.Schema({
         type: [mongoose.Schema.ObjectId],
         ref: 'Fight'
     },
+    // {
+    //     season(1960-1961): {
+    //         team: [{
+    //                 id: ObjectId
+    //                 name: team fullname
+    //                 fights: [fights]
+    //          }], -> can have multiple teams to a season
+    // 
+    //     },
+    teams: {
+        type: Object
+    },
     wins: {
         type: Number,
         default: 0

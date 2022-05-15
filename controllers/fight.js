@@ -61,6 +61,35 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Fight not found`, 404));
     }
 
+    //check if the player is changing the team they fought for
+    //team change only not player change
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //      NEED TO UPDATE PLAYERS PROFILE
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    let players = fight.players;
+
+    if(req.body.player1Team && !req.body.players){
+        if(players[0].id.toString() === req.body.player1Team.player.id){
+            players[0].teamId = req.body.player1Team.team.id;
+        }
+        if(players[1].id.toString() === req.body.player1Team.player.id){
+            players[1].teamId = req.body.player1Team.team.id;
+        }
+        delete req.body.player1Team;
+    }
+
+    if(req.body.player2Team && !req.body.players){
+        if(players[0].id.toString() === req.body.player2Team.player.id){
+            players[0].teamId = req.body.player2Team.team.id;
+        }
+        if(players[1].id.toString() === req.body.player2Team.player.id){
+            players[1].teamId = req.body.player2Team.team.id;
+        }
+        delete req.body.player2Team;
+    }
+    fight.players = players;
+    fight.markModified('players');
+
     //outcome update for fight winner
     //req.body.outcome is the outcome object
     if(req.body.outcome){

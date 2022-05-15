@@ -2,7 +2,17 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const ErrorResponse = require('../utils/ErrorResponse');
 const asyncHandler = require('../middleware/async');
-const {sendEmail} = require('../utils/sendEmail');
+// const {sendEmail} = require('../utils/sendEmail');
+// const sgMail = require('@sendgrid/mail');
+// sgMail.setApiKey(`${process.env.SENDGRID_API_KEY}`);
+const nodemailer = require('nodemailer');
+const nodemailerSendgrid = require('nodemailer-sendgrid');
+
+const transport = nodemailer.createTransport(
+    nodemailerSendgrid({
+        apiKey: process.env.SENDGRID_API_KEY
+    })
+);
 
 
 //@desc     Register a user
@@ -139,23 +149,31 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     const message = `You are recieving this email because you (or someone else) has requested the reset of a password.  Please visit: ${resetUrl} to change your password`;
 
     let resetEmail = {
-        from: 'hockey00chronicles@gmail.com',
-        to: user.email,
+        from: 'bryanjameslilly@gmail.com',
+        to: `${user.email}`,
         subject: 'Hockey Fight Chronicles Password Reset',
-        text: message
+        text: `${message}`,
+        
     }
 
     try {
-        sendEmail(resetEmail, (err) => {
-            if(err){
-                throw new Error('cannot send email')
-            } else {
-                res.status(200).json({
-                    success: true,
-                    data: 'Email sent'
-                })
-            }
+        
+        transport.sendMail(resetEmail, () => {
+            res.status(200).json({
+                success: true,
+                data: 'Email sent'
+            })
         })
+
+        // sgMail.send(resetEmail).then(() => {
+        //     res.status(200).json({
+        //         success: true,
+        //         data: 'Email sent'
+        //     })}
+        //     ).catch((error) => {
+        //         throw new Error('cannot send email');
+        //     })
+        
 
 
     } catch (err) {

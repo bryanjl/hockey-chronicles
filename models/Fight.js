@@ -14,6 +14,9 @@ const FightSchema = new mongoose.Schema({
     teams: {
         type: [Object]
     },
+    // [
+    //     {firstName, lastName, _id, teamId}
+    // ]
     players: {
         type: [Object]
     },
@@ -333,7 +336,6 @@ FightSchema.methods.updateUnfair = async function(newUnfair){
     await player2.save();
 }
 
-//THIS NEEDS CHANGING SINCE EMBEDDING DOCUMENTS INSTEAD OF REFERENCING PLAYERS
 FightSchema.methods.updatePlayers = async function(playersToChange){
     //playerToAdd/playerToRemove come from request
     let playerToAdd = playersToChange.newPlayer;
@@ -435,6 +437,11 @@ FightSchema.methods.updatePlayers = async function(playersToChange){
         weight: playerToAddInstance.weight,
         shoots: playerToAddInstance.shoots
     }
+
+    if(playerToRemove.teamId){
+        newPlayerInfo.teamId = playerToRemove.teamId;   
+    }
+
     this.players = [playerToStay, newPlayerInfo];
 }
 

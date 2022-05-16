@@ -79,4 +79,52 @@ PlayerSchema.methods.updateActionRating = async function(newScore){
     this.actionRating.votes += 1;
 }
 
+PlayerSchema.methods.updateTeamsPlayedFor = async function(playerInfo, fightInfo) {
+    // {
+    //     season(1960-1961): {
+    //         teamId: {
+    //                 name: team fullname
+    //                 fights: [fights]
+    //          }, -> can have multiple teams to a season
+    // 
+    //     },
+    console.log('NEW!!!!!!!!!!!!!!!!!!!!')
+    console.log(playerInfo, fightInfo)
+
+    let currTeamsObj = this.teams || {};
+    let teamName = fightInfo.teams[0].id === playerInfo.teamId ? `${fightInfo.teams[0].city} ${fightInfo.teams[0].name}`: `${fightInfo.teams[1].city} ${fightInfo.teams[1].name}`;
+
+    console.log(currTeamsObj)
+
+    if(!currTeamsObj[`${fightInfo.season.season}`]){
+        currTeamsObj[`${fightInfo.season.season}`] = {}
+        currTeamsObj[`${fightInfo.season.season}`][`${playerInfo.teamId}`] =
+            {
+                name: teamName,
+                fights: [fightInfo._id]
+            }
+    } else if(currTeamsObj[`${fightInfo.season.season}`] && !currTeamsObj[`${fightInfo.season.season}`][`${playerInfo.teamId}`]) {
+        currTeamsObj[`${fightInfo.season.season}`][`${playerInfo.teamId}`] = 
+            {
+                name: teamName,
+                fights: [fightInfo._id]
+            }
+    } else if(currTeamsObj[`${fightInfo.season.season}`] && currTeamsObj[`${fightInfo.season.season}`][`${playerInfo.teamId}`]){
+        let fightExists = false;
+        currTeamsObj[`${fightInfo.season.season}`][`${playerInfo.teamId}`].fights.forEach(fight => {
+            if(fight.toString() === fightInfo._id.toString()){
+                console.log(fight.toString(), fightInfo._id.toString())
+                fightExists = true;
+            }
+        })
+        if(fightExists){
+            console.log('here', fightExists)
+            return;
+        }
+        currTeamsObj[`${fightInfo.season.season}`][`${playerInfo.teamId}`].fights.push(fightInfo._id);
+    }
+    this.teams = currTeamsObj;
+    // console.log(currTeamsObj.fights)
+}
+
 module.exports = mongoose.model('Player', PlayerSchema);

@@ -9,6 +9,7 @@ const { createFight } = require('./helpers/createFight');
 const Fight = require('../models/Fight');
 const Game = require('../models/Game');
 const Comment = require('../models/Comment');
+const Player = require('../models/Player');
 
 
 //@desc     Get all fights
@@ -63,17 +64,23 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
 
     //check if the player is changing the team they fought for
     //team change only not player change
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //      NEED TO UPDATE PLAYERS PROFILE
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //updates player.teams object 
     let players = fight.players;
 
     if(req.body.player1Team && !req.body.players){
         if(players[0].id.toString() === req.body.player1Team.player.id){
             players[0].teamId = req.body.player1Team.team.id;
+            let playerInstance = await Player.findById(players[0].id);
+            await playerInstance.updateTeamsPlayedFor(players[0], fight);
+            playerInstance.markModified('teams');
+            await playerInstance.save();
         }
         if(players[1].id.toString() === req.body.player1Team.player.id){
             players[1].teamId = req.body.player1Team.team.id;
+            let playerInstance = await Player.findById(players[1].id);
+            await playerInstance.updateTeamsPlayedFor(players[1], fight);
+            playerInstance.markModified('teams');
+            await playerInstance.save();
         }
         delete req.body.player1Team;
     }
@@ -81,9 +88,17 @@ exports.updateFight = asyncHandler(async (req, res, next) => {
     if(req.body.player2Team && !req.body.players){
         if(players[0].id.toString() === req.body.player2Team.player.id){
             players[0].teamId = req.body.player2Team.team.id;
+            let playerInstance = await Player.findById(players[0].id);
+            await playerInstance.updateTeamsPlayedFor(players[0], fight);
+            playerInstance.markModified('teams');
+            await playerInstance.save();
         }
         if(players[1].id.toString() === req.body.player2Team.player.id){
             players[1].teamId = req.body.player2Team.team.id;
+            let playerInstance = await Player.findById(players[1].id);
+            await playerInstance.updateTeamsPlayedFor(players[1], fight);
+            playerInstance.markModified('teams');
+            await playerInstance.save();
         }
         delete req.body.player2Team;
     }

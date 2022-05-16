@@ -123,7 +123,7 @@ exports.createFight = asyncHandler(async (req) => {
     await addReferenceToLeague(fightInfo.league.id, fight._id);
     // only add reference to pplayers if players are present
     if(fightInfo.players.length === 2){
-        await addReferenceToPlayers(fightInfo.players, fight._id);
+        await addReferenceToPlayers(fightInfo.players, fight);
     }    
     await addReferenceToSeason(fightInfo.season.id, fight._id);
     await addReferenceToTeams(fightInfo.teams, fight._id);   
@@ -152,17 +152,21 @@ const addReferenceToTeams = asyncHandler(async(teams, fightId) => {
 });
 
 //add fight to each player's fight array
-const addReferenceToPlayers = asyncHandler(async(players, fightId) => {
+const addReferenceToPlayers = asyncHandler(async(players, fight) => {
     try {
         let player1 = await Player.findById(players[0].id);
         let player2 = await Player.findById(players[1].id);
 
-        player1.fights.push(fightId);
+        player1.fights.push(fight._id);
+        await player1.updateTeamsPlayedFor(players[0], fight);
         player1.markModified('fights');
+        player1.markModified('teams');
         await player1.save();
 
-        player2.fights.push(fightId);
+        player2.fights.push(fight._id);
+        await player2.updateTeamsPlayedFor(players[1], fight);
         player2.markModified('fights');
+        player2.markModified('teams');
         await player2.save();
     } catch (error) {
         console.log(error);

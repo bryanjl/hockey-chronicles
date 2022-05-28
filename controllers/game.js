@@ -195,6 +195,13 @@ exports.updateGame = asyncHandler(async (req, res,next) => {
 
     const updatedGame = await Game.findByIdAndUpdate(req.params.id, req.body, {new: true});
 
+    updatedGame.fights.forEach(async(gameFight) => {
+        let fight = await Fight.findById(gameFight);
+        fight.gameType = updatedGame.gameType;
+        fight.markModified('gameType');
+        await fight.save();
+    });
+
     res.status(200).json({
         success: true,
         data: updatedGame

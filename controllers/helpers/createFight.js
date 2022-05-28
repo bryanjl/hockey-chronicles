@@ -11,12 +11,22 @@ const Season = require('../../models/Season');
 const League = require('../../models/League');
 
 exports.createFight = asyncHandler(async (req) => {
+    try {
+        
+   
     // console.log(req.body);
     let fightInfo = {};
+
+    let game = await Game.findById(req.body.game);
+    if(!game){
+        return next(new ErrorResponse(`Server Error - Could not find game`, 500));
+    }
+    // console.log(req.body);
 
     fightInfo.league = req.body.league;
     fightInfo.season = req.body.season;
     fightInfo.game = req.body.game;
+    fightInfo.gameType = game.gameType;
 
     //players - embed data
     if(req.body.players){
@@ -109,12 +119,9 @@ exports.createFight = asyncHandler(async (req) => {
     if(!fight){
         return next(new ErrorResponse(`Unable to create fight - Server Error`, 500));
     }
+    console.log(fight);
 
     //add fight to game's fight array
-    let game = await Game.findById(req.body.game);
-    if(!game){
-        return next(new ErrorResponse(`Server Error - Could not find game`, 500));
-    }
     game.fights.push(fight._id);
     game.markModified('fights');
     await game.save();
@@ -129,6 +136,9 @@ exports.createFight = asyncHandler(async (req) => {
     await addReferenceToTeams(fightInfo.teams, fight._id);   
 
     return fight;
+} catch (error) {
+    console.log(error)
+}
 });
 
 //methods to add fight to the proper models

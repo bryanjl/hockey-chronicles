@@ -22,6 +22,7 @@ const teams = require('./routes/team');
 const auth = require('./routes/auth');
 const search = require('./routes/search');
 const admin = require('./routes/admin');
+const stats = require('./routes/stats');
 
 
 //conect to DB
@@ -78,6 +79,7 @@ app.use('/api/v1/teams', teams);
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/search', search);
 app.use('/api/v1/admin', admin);
+app.use('/api/v1/stats', stats);
 
 
 //Mount Error handler

@@ -51,7 +51,6 @@ const FightSchema = new mongoose.Schema({
     },
     gameType: {
         type: String,
-        enum: ['Regular', 'Round 1', 'Preseason', 'Quarter Final', 'Semi Final', 'Final'],
         default: 'Regular'
     },
     fightType: {

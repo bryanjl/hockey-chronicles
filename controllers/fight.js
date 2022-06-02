@@ -3,7 +3,7 @@ const asyncHandler = require('../middleware/async');
 const ErrorResponse = require('../utils/ErrorResponse');
 
 //helper function
-const { createFight } = require('./helpers/createFight');
+const { createFight, createIntraSquadFight } = require('./helpers/createFight');
 
 //models
 const Fight = require('../models/Fight');
@@ -44,10 +44,25 @@ exports.getFight = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/fights/
 //@access   Private - logged in user
 exports.createFight = asyncHandler(async (req, res, next) => { 
-   
-    let fight = await createFight(req);
+    let fight = null;
 
-    sendPopulatedResponse(fight, 200, res);
+    
+
+    if (req.body.teams.length === 1) {
+        
+        fight = await createIntraSquadFight(req);
+    } else {
+        fight = await createFight(req);
+    }
+
+    console.log(fight);
+
+    if(fight !== null){
+        sendPopulatedResponse(fight, 200, res);
+    } else {
+        return next(new ErrorResponse(`Unable to create fight`, 500));
+    }
+    
 });
 
 //@desc     Update a fight by ID

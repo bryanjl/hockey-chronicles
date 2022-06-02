@@ -83,6 +83,10 @@ const FightSchema = new mongoose.Schema({
     featuredFight: {
         type: Boolean,
         default: false
+    },
+    tookPlaceAt: {
+        type: String,
+        default: 'N/A'
     }
 });
 

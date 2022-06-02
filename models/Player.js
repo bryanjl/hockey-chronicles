@@ -88,13 +88,16 @@ PlayerSchema.methods.updateTeamsPlayedFor = async function(playerInfo, fightInfo
     //          }, -> can have multiple teams to a season
     // 
     //     },
-    console.log('NEW!!!!!!!!!!!!!!!!!!!!')
-    console.log(playerInfo, fightInfo)
+    // console.log('NEW!!!!!!!!!!!!!!!!!!!!')
+    // console.log(playerInfo, fightInfo)
 
     let currTeamsObj = this.teams || {};
-    let teamName = fightInfo.teams[0].id === playerInfo.teamId ? `${fightInfo.teams[0].city} ${fightInfo.teams[0].name}`: `${fightInfo.teams[1].city} ${fightInfo.teams[1].name}`;
-
-    console.log(currTeamsObj)
+    let teamName;
+    if(fightInfo.teams.length === 1){
+        teamName = `${fightInfo.teams[0].city} ${fightInfo.teams[0].name}`
+    } else {
+        teamName = fightInfo.teams[0].id === playerInfo.teamId ? `${fightInfo.teams[0].city} ${fightInfo.teams[0].name}`: `${fightInfo.teams[1].city} ${fightInfo.teams[1].name}`;
+    }
 
     if(!currTeamsObj[`${fightInfo.season.season}`]){
         currTeamsObj[`${fightInfo.season.season}`] = {}

@@ -12,157 +12,310 @@ const League = require('../../models/League');
 
 exports.createFight = asyncHandler(async (req) => {
     try {
-        
-   
-    // console.log(req.body);
-    let fightInfo = {};
 
-    let game = await Game.findById(req.body.game);
-    if(!game){
-        return next(new ErrorResponse(`Server Error - Could not find game`, 500));
-    }
-    // console.log(req.body);
 
-    fightInfo.league = req.body.league;
-    fightInfo.season = req.body.season;
-    fightInfo.game = req.body.game;
-    fightInfo.gameType = game.gameType;
+        // console.log(req.body);
+        let fightInfo = {};
 
-    //players - embed data
-    if(req.body.players){
-        let players = [];
-        let player1 = await Player.findById(req.body.players[0]._id);
-        if(!player1){
-            console.log('no player 1')
+        let game = await Game.findById(req.body.game);
+        if (!game) {
+            return next(new ErrorResponse(`Server Error - Could not find game`, 500));
         }
-        let player1Info = {
-            id: player1._id,
-            firstName: player1.firstName,
-            lastName: player1.lastName,
-            position: player1.position,
-            wins: player1.wins,
-            losses: player1.losses,
-            draws: player1.draws,
-            height: player1.height,
-            weight: player1.weight,
-            shoots: player1.shoots,
-            teamId: req.body.players[0].teamId
+        // console.log(req.body);
+
+        fightInfo.league = req.body.league;
+        fightInfo.season = req.body.season;
+        fightInfo.game = req.body.game;
+        fightInfo.gameType = game.gameType;
+
+        //players - embed data
+        if (req.body.players) {
+            let players = [];
+            let player1 = await Player.findById(req.body.players[0]._id);
+            if (!player1) {
+                console.log('no player 1')
+            }
+            let player1Info = {
+                id: player1._id,
+                firstName: player1.firstName,
+                lastName: player1.lastName,
+                position: player1.position,
+                wins: player1.wins,
+                losses: player1.losses,
+                draws: player1.draws,
+                height: player1.height,
+                weight: player1.weight,
+                shoots: player1.shoots,
+                teamId: req.body.players[0].teamId
+            }
+            let player2 = await Player.findById(req.body.players[1]._id);
+            if (!player2) {
+                console.log('no player 2')
+            }
+            let player2Info = {
+                id: player2._id,
+                firstName: player2.firstName,
+                lastName: player2.lastName,
+                position: player2.position,
+                wins: player2.wins,
+                losses: player2.losses,
+                draws: player2.draws,
+                height: player2.height,
+                weight: player2.weight,
+                shoots: player2.shoots,
+                teamId: req.body.players[1].teamId
+            }
+            players.push(player1Info);
+            players.push(player2Info);
+            fightInfo.players = players;
+
+            //outcome frequency counter for voting
+            let outcome = {};
+            fightInfo.players.forEach(element => {
+                outcome[element.id] = 0;
+            });
+            outcome.draw = 0;
+            //set outcome object to request body
+            fightInfo.outcome = outcome;
         }
-        let player2 = await Player.findById(req.body.players[1]._id);
-        if(!player2){
-            console.log('no player 2')
+
+        //teams
+        fightInfo.teams = req.body.teams;
+
+        //action rating average - freq counter
+        let actionRating = {
+            average: 0,
+            votes: 0
+        };
+        //set actionRating to request body
+        fightInfo.actionRating = actionRating;
+
+        //date of fight
+        fightInfo.date = req.body.date;
+
+        //time in game
+        fightInfo.time = req.body.time;
+
+        //link to youtube video
+        fightInfo.videoLink = req.body.videoLink;
+
+        //description of fight/event
+        if (req.body.description) {
+            fightInfo.description = req.body.description;
+        } else {
+            fightInfo.eventDescription = req.body.eventDescription
         }
-        let player2Info = {
-            id: player2._id,
-            firstName: player2.firstName,
-            lastName: player2.lastName,
-            position: player2.position,
-            wins: player2.wins,
-            losses: player2.losses,
-            draws: player2.draws,
-            height: player2.height,
-            weight: player2.weight,
-            shoots: player2.shoots,
-            teamId: req.body.players[1].teamId
+
+        //fightType
+        if (!req.body.fightType) {
+            fightInfo.fightType = 'Fight';
+        } else {
+            fightInfo.fightType = req.body.fightType;
         }
-        players.push(player1Info);
-        players.push(player2Info);
-        fightInfo.players = players;
-     
-        //outcome frequency counter for voting
-        let outcome = {};
-        fightInfo.players.forEach(element => {
-            outcome[element.id] = 0;
-        });
-        outcome.draw = 0;
-        //set outcome object to request body
-        fightInfo.outcome = outcome;
+
+        // create fight
+        let fight = await Fight.create(fightInfo);
+
+        if (!fight) {
+            return next(new ErrorResponse(`Unable to create fight - Server Error`, 500));
+        }
+        console.log(fight);
+
+        //add fight to game's fight array
+        game.fights.push(fight._id);
+        game.markModified('fights');
+        await game.save();
+
+        //add fight references to to the appropriate models
+        await addReferenceToLeague(fightInfo.league.id, fight._id);
+        // only add reference to pplayers if players are present
+        if (fightInfo.players.length === 2) {
+            await addReferenceToPlayers(fightInfo.players, fight);
+        }
+        await addReferenceToSeason(fightInfo.season.id, fight._id);
+        await addReferenceToTeams(fightInfo.teams, fight._id);
+
+        return fight;
+    } catch (error) {
+        console.log(error)
     }
+});
 
-    //teams
-    fightInfo.teams = req.body.teams;
+//fights with one team for intrasquad fights -> training camp/rookie camp/practice
+exports.createIntraSquadFight = asyncHandler(async (req) => {
+    try {
 
-    //action rating average - freq counter
-    let actionRating = {
-        average: 0,
-        votes: 0
-    };
-    //set actionRating to request body
-    fightInfo.actionRating = actionRating;  
 
-    //date of fight
-    fightInfo.date = req.body.date;
+        // console.log(req.body);
+        let fightInfo = {};
 
-    //time in game
-    fightInfo.time = req.body.time;
+        let reqLeague = await League.findOne({name: req.body.league});
 
-    //link to youtube video
-    fightInfo.videoLink = req.body.videoLink;
+        if(!reqLeague){
+            return next(new ErrorResponse(`Cannot find league ${req.body.league}`, 404));
+        }
 
-    //description of fight/event
-    if(req.body.description){
-        fightInfo.description = req.body.description;
-    } else {
-        fightInfo.eventDescription = req.body.eventDescription
+        fightInfo.league = {
+            id: reqLeague._id,
+            name: reqLeague.name
+        };
+
+        let reqSeason = await Season.findOne({season: req.body.season});
+
+        if(!reqSeason){
+            return next(new ErrorResponse(`Cannot find season ${req.body.season}`, 404));
+        }
+
+        fightInfo.season = {
+            season: reqSeason.season,
+            id: reqSeason._id
+        };
+        fightInfo.tookPlaceAt = req.body.tookPlaceAt;
+        fightInfo.gameType = 'N/A';
+
+        //players - embed data
+        if (req.body.players) {
+            let players = [];
+            let player1 = await Player.findById(req.body.players[0]._id);
+            if (!player1) {
+                console.log('no player 1')
+            }
+            let player1Info = {
+                id: player1._id,
+                firstName: player1.firstName,
+                lastName: player1.lastName,
+                position: player1.position,
+                wins: player1.wins,
+                losses: player1.losses,
+                draws: player1.draws,
+                height: player1.height,
+                weight: player1.weight,
+                shoots: player1.shoots,
+                teamId: req.body.players[0].teamId
+            }
+            let player2 = await Player.findById(req.body.players[1]._id);
+            if (!player2) {
+                console.log('no player 2')
+            }
+            let player2Info = {
+                id: player2._id,
+                firstName: player2.firstName,
+                lastName: player2.lastName,
+                position: player2.position,
+                wins: player2.wins,
+                losses: player2.losses,
+                draws: player2.draws,
+                height: player2.height,
+                weight: player2.weight,
+                shoots: player2.shoots,
+                teamId: req.body.players[1].teamId
+            }
+            players.push(player1Info);
+            players.push(player2Info);
+            fightInfo.players = players;
+
+            //outcome frequency counter for voting
+            let outcome = {};
+            fightInfo.players.forEach(element => {
+                outcome[element.id] = 0;
+            });
+            outcome.draw = 0;
+            //set outcome object to request body
+            fightInfo.outcome = outcome;
+        }
+
+        //teams
+        fightInfo.teams = req.body.teams;
+
+        //action rating average - freq counter
+        let actionRating = {
+            average: 0,
+            votes: 0
+        };
+        //set actionRating to request body
+        fightInfo.actionRating = actionRating;
+
+        //date of fight
+        fightInfo.date = req.body.date;
+
+        //time in game
+        fightInfo.time = req.body.time;
+
+        //link to youtube video
+        fightInfo.videoLink = req.body.videoLink;
+
+        //description of fight/event
+        if (req.body.description) {
+            fightInfo.description = req.body.description;
+        } else {
+            fightInfo.eventDescription = req.body.eventDescription
+        }
+
+        //fightType
+        if (!req.body.fightType) {
+            fightInfo.fightType = 'Fight';
+        } else {
+            fightInfo.fightType = req.body.fightType;
+        }
+
+        // create fight
+        let fight = await Fight.create(fightInfo);
+
+        if (!fight) {
+            return next(new ErrorResponse(`Unable to create fight - Server Error`, 500));
+        }
+        // console.log(fight);
+
+        //add fight to game's fight array
+        // game.fights.push(fight._id);
+        // game.markModified('fights');
+        // await game.save();
+
+        //add fight references to to the appropriate models
+        await addReferenceToLeague(fightInfo.league.id, fight._id);
+        // only add reference to pplayers if players are present
+        if (fightInfo.players.length === 2) {
+            await addReferenceToPlayers(fightInfo.players, fight);
+        }
+        await addReferenceToSeason(fightInfo.season.id, fight._id);
+        await addReferenceToTeams(fightInfo.teams, fight._id);
+
+        return fight;
+    } catch (error) {
+        console.log(error)
     }
-
-    //fightType
-    if(!req.body.fightType){
-        fightInfo.fightType = 'Fight';
-    } else {
-        fightInfo.fightType = req.body.fightType;
-    }
-
-    // create fight
-    let fight = await Fight.create(fightInfo);
-
-    if(!fight){
-        return next(new ErrorResponse(`Unable to create fight - Server Error`, 500));
-    }
-    console.log(fight);
-
-    //add fight to game's fight array
-    game.fights.push(fight._id);
-    game.markModified('fights');
-    await game.save();
-
-    //add fight references to to the appropriate models
-    await addReferenceToLeague(fightInfo.league.id, fight._id);
-    // only add reference to pplayers if players are present
-    if(fightInfo.players.length === 2){
-        await addReferenceToPlayers(fightInfo.players, fight);
-    }    
-    await addReferenceToSeason(fightInfo.season.id, fight._id);
-    await addReferenceToTeams(fightInfo.teams, fight._id);   
-
-    return fight;
-} catch (error) {
-    console.log(error)
-}
 });
 
 //methods to add fight to the proper models
 
 //add fight to team's fight array
-const addReferenceToTeams = asyncHandler(async(teams, fightId) => {
+const addReferenceToTeams = asyncHandler(async (teams, fightId) => {
     try {
-        let team1 = await Team.findById(teams[0].id);
-        let team2 = await Team.findById(teams[1].id);
-
-        team1.fights.push(fightId);
-        team1.markModified('fights');
-        await team1.save();
-
-        team2.fights.push(fightId);
-        team2.markModified('fights');
-        await team2.save();
+        if(teams.length === 1){
+            let team1 = await Team.findById(teams[0]._id);
+            team1.fights.push(fightId);
+            team1.markModified('fights');
+            await team1.save();
+        } else {
+            let team1 = await Team.findById(teams[0].id);
+            let team2 = await Team.findById(teams[1].id);
+    
+            team1.fights.push(fightId);
+            team1.markModified('fights');
+            await team1.save();
+    
+            team2.fights.push(fightId);
+            team2.markModified('fights');
+            await team2.save();
+        }
+        
     } catch (error) {
         console.log(error);
     }
 });
 
 //add fight to each player's fight array
-const addReferenceToPlayers = asyncHandler(async(players, fight) => {
+const addReferenceToPlayers = asyncHandler(async (players, fight) => {
     try {
         let player1 = await Player.findById(players[0].id);
         let player2 = await Player.findById(players[1].id);
@@ -184,7 +337,7 @@ const addReferenceToPlayers = asyncHandler(async(players, fight) => {
 });
 
 //add fight to season's fight array
-const addReferenceToSeason = asyncHandler(async(seasonId, fightId) => {
+const addReferenceToSeason = asyncHandler(async (seasonId, fightId) => {
     try {
         let season = await Season.findById(seasonId);
         season.fights.push(fightId);
@@ -196,7 +349,7 @@ const addReferenceToSeason = asyncHandler(async(seasonId, fightId) => {
 });
 
 //add fight to league's fight array
-const addReferenceToLeague = asyncHandler(async(leagueId, fightId) => {
+const addReferenceToLeague = asyncHandler(async (leagueId, fightId) => {
     try {
         let league = await League.findById(leagueId);
         league.fights.push(fightId);

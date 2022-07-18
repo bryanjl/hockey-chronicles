@@ -6,7 +6,8 @@ const LeagueSchema = new mongoose.Schema({
         required: [true, 'Please add a name for the League']
     },
     description: {
-        type: String
+        type: String,
+        default: ''
     },
     fights: {
         type: [mongoose.Schema.ObjectId],
@@ -17,7 +18,8 @@ const LeagueSchema = new mongoose.Schema({
         ref: 'Game'
     },
     leagueImageFile: {
-        type: String
+        type: String,
+        default: ''
     }
 });
 

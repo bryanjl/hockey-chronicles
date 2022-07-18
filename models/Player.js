@@ -64,7 +64,8 @@ const PlayerSchema = new mongoose.Schema({
         type: [String]
     },
     playerImageFile: {
-        type: String
+        type: String,
+        default: ''
     }
 });
 

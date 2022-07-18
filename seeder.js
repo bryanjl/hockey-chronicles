@@ -267,6 +267,10 @@ const seedGames = async(gameData) => {
             //Date of fight
             // fightInfo.date = new Date(data.date);
 
+            if(data.gameType){
+                fightInfo.gameType = data.gameType;
+            }
+
             // create fight
             let fight = await Fight.create(fightInfo);
 
@@ -377,6 +381,9 @@ const seedGames = async(gameData) => {
         }
 
         else if(!Array.isArray(gameData[i].players[0])){
+            try {
+                
+            
             let createdFight = [];
             
             let fight = await createFight(gameData[i], info);
@@ -391,6 +398,9 @@ const seedGames = async(gameData) => {
             game.fights = createdFight;
             game.markModified('fights');
             await game.save();
+        } catch (error) {
+            console.log(error);
+        }
         }
     }
     process.exit();
@@ -658,14 +668,14 @@ if(process.argv[2] === '-seedFights'){
     const seasons = JSON.parse(fs.readFileSync(`${__dirname}/_data/seasons.json`, 'utf-8'));
     seedSeasons(seasons);
 } else if(process.argv[2] === '-seedTeams'){
-    const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/AHLteams.json`, 'utf-8'));
+    const teams = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHLteams.json`, 'utf-8'));
     seedTeams(teams);
 } else if(process.argv[2] === '-deleteTeams'){
     deleteTeams();
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHL 77-78.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/compiledNHL8590.json`, 'utf-8'));
     seedGames(games);
 } else if(process.argv[2] === '-deleteGames'){
     deleteGames();

@@ -27,7 +27,8 @@ const TeamSchema = new mongoose.Schema({
         type: [String]
     },
     teamImageFile: {
-        type: String
+        type: String,
+        default: ''
     }
 });
 

@@ -48,6 +48,7 @@ exports.playerSearch = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/players/
 //@access   Private - logged in user
 exports.createPlayer = asyncHandler(async (req, res, next) => {
+    console.log('here')
     //action rating average - freq counter
     let actionRating = {
         average: 0,
@@ -56,7 +57,14 @@ exports.createPlayer = asyncHandler(async (req, res, next) => {
     //set actionRating to request body
     req.body.actionRating = actionRating;
 
-    req.body.playerImageFile = req.file.path;
+    // if(req.file.path){
+    //     req.body.playerImageFile = req.file.path;
+    // } else {
+    //     req.body.playerImageFile = ''
+    // }
+    
+
+    console.log(req.body)
 
     let player = await Player.create(req.body);
 

@@ -14,6 +14,8 @@ const multerImageUpload = (imageFolder) => {
         }
     });
 
+    
+
     const fileFilter = (req, file, cb) => {
         if(file.size > (1024 * 1024 * 3)){
             //file size greater than 3mb
@@ -28,7 +30,7 @@ const multerImageUpload = (imageFolder) => {
             cb(null, true);
         }   
     }
-
+    
     const upload = multer({
         storage: storage,
         fileFilter: fileFilter

@@ -20,28 +20,28 @@ exports.getLeague = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`League with ID of ${req.params.id} Not Found`, 404));
     }
 
-    res.status(200).json({
-        success: true,
-        data: league
-    })
+    // res.status(200).json({
+    //     success: true,
+    //     data: league
+    // })
 
-    // let reqResObj = {
-    //     req,
-    //     res
-    // }
+    let reqResObj = {
+        req,
+        res
+    }
 
-    // if(req.query.season){
-    //     sendPopulatedResponse(reqResObj, league, 200);
-    // } else {
-    //     let data = res.leagueData.data;
-    //     let pagination = res.leaguePagination.pagination;
-    //     res.status(200).json({
-    //         success: true,
-    //         league,
-    //         data,
-    //         pagination
-    //     })
-    // }
+    if(req.query.season){
+        sendPopulatedResponse(reqResObj, league, 200);
+    } else {
+        let data = res.leagueData.data;
+        let pagination = res.leaguePagination.pagination;
+        res.status(200).json({
+            success: true,
+            league,
+            data,
+            pagination
+        })
+    }
 
 });
 
@@ -51,13 +51,16 @@ exports.getLeague = asyncHandler(async (req, res, next) => {
 exports.createLeague = asyncHandler(async (req, res, next) => {
     req.body.name = req.body.name.toUpperCase();
 
-    req.body.leagueImageFile = req.file.path;
-
-    console.log(req.body);
+    req.body.leagueImageFile = req.body.imageFile;
 
     let league = await League.create(req.body);
+
+    let reqResObj = {
+        req,
+        res,
+    }
     
-    sendPopulatedResponse(league, 200, res);
+    sendPopulatedResponse(reqResObj, league, 200);
 });
 
 //@desc     Update a league
@@ -79,7 +82,12 @@ exports.updateLeague = asyncHandler(async (req, res, next) => {
     
     league = await League.findByIdAndUpdate(req.params.id, req.body);
 
-    sendPopulatedResponse(league, 200, res);
+    let reqResObj = {
+        req,
+        res
+    }
+
+    sendPopulatedResponse(reqResObj, league, 200);
 });
 
 //@desc     Delete a league by ID
@@ -105,7 +113,7 @@ const sendPopulatedResponse = asyncHandler(async function (reqResObj, league, st
         '_id': { $in: 
             league.fights
         },
-        'season.season': reqResObj.req.query.season
+        'season.season': reqResObj.req.query.season || '*'
     }).sort({'date': 1});
 
     //Get games
@@ -113,7 +121,7 @@ const sendPopulatedResponse = asyncHandler(async function (reqResObj, league, st
         '_id': { $in: 
             league.games
         },
-        'season.season': reqResObj.req.query.season
+        'season.season': reqResObj.req.query.season || '*'
     }).sort({'date': 1});
 
     league = await League.findById(league._id).select('-games -fights');

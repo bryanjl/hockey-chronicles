@@ -46,7 +46,7 @@ const leagueData = () => async(req, res, next) => {
         }
     }
 
-    if(req.query.term === 'fights'){
+    else if(req.query.term === 'fights'){
         let returnedFightIDs = league.fights.slice(startIndex, endIndex);
         pagination.totalDocuments = league.fights.length;
         pagination.page = page;
@@ -66,6 +66,14 @@ const leagueData = () => async(req, res, next) => {
         }
     }
 
+    else {
+        res.leagueData = {
+            data: []
+        }
+        res.leaguePagination = {
+            pagination: 0
+        }
+    }
     next();
 }
 

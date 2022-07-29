@@ -23,8 +23,8 @@ const router = express.Router();
 router
     .route('/')
     .get(advancedResults(Player, 'lastName', 'default'), getAllPlayers)
-    .post(createPlayer);
-    // upload.single('playerImg'),
+    .post(upload.single('playerImg'), createPlayer);
+    
 router  
     .route('/search')
     .get(playerSearch);

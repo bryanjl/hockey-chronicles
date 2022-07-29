@@ -57,18 +57,18 @@ exports.createPlayer = asyncHandler(async (req, res, next) => {
     //set actionRating to request body
     req.body.actionRating = actionRating;
 
-    // if(req.file.path){
-    //     req.body.playerImageFile = req.file.path;
-    // } else {
-    //     req.body.playerImageFile = ''
-    // }
-    
+    req.body.playerImageFile = req.body.imageFile;
 
     console.log(req.body)
 
     let player = await Player.create(req.body);
 
-    sendPopulatedResponse(player, 200, res);
+    let reqResObj = {
+        req,
+        res
+    }
+
+    sendPopulatedResponse(reqResObj, player, 200);
 });
 
 //@desc     Update a player
@@ -87,7 +87,12 @@ exports.updatePlayer = asyncHandler(async (req, res, next) => {
 
     player = await Player.findByIdAndUpdate(req.params.id, req.body, {new: true});
 
-    sendPopulatedResponse(player, 200, res);
+    let reqResObj = {
+        req, 
+        res
+    }
+
+    sendPopulatedResponse(reqResObj, player, 200);
 });
 
 //@desc     Delete a player by ID

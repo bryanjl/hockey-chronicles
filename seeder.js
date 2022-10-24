@@ -38,7 +38,7 @@ const seedGames = async(gameData) => {
             
             //set teams
             let teams = [];
-            let team1 = await Team.findOne({ city: data.teams[0], "league.name": 'NHL' });
+            let team1 = await Team.findOne({ city: data.teams[0], "league.name": 'AHL' });
             let team1Info = {
                 id: team1._id,
                 city: team1.city,
@@ -47,7 +47,7 @@ const seedGames = async(gameData) => {
             }
             teams.push(team1Info);
     
-            let team2 = await Team.findOne({ city: data.teams[1], "league.name": 'NHL' });
+            let team2 = await Team.findOne({ city: data.teams[1], "league.name": 'AHL' });
             let team2Info = {
                 id: team2._id,
                 city: team2.city,
@@ -659,7 +659,7 @@ if(process.argv[2] === '-seedFights'){
     const fights = JSON.parse(fs.readFileSync(`${__dirname}/_data/fights.json`, 'utf-8'));
     seedFights(fights);
 } else if(process.argv[2] === '-seedPlayers'){
-    const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/AHL.json`, 'utf-8'));
+    const players = JSON.parse(fs.readFileSync(`${__dirname}/_data/NHL.json`, 'utf-8'));
     seedPlayers(players);
 } else if(process.argv[2] === '-seedLeagues'){
     const leagues = JSON.parse(fs.readFileSync(`${__dirname}/_data/leagues.json`, 'utf-8'));
@@ -675,7 +675,7 @@ if(process.argv[2] === '-seedFights'){
 } else if(process.argv[2] === '-deletePlayers'){
     deletePlayers();
 } else if(process.argv[2] === '-seedGames'){
-    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/compiledNHL8590.json`, 'utf-8'));
+    const games = JSON.parse(fs.readFileSync(`${__dirname}/_data/AHL 03-04.json`, 'utf-8'));
     seedGames(games);
 } else if(process.argv[2] === '-deleteGames'){
     deleteGames();

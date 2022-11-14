@@ -1,29 +1,25 @@
+const Team = require('../models/Team');
+const Player = require('../models/Player');
+
 const topFive = (model) => async(req, res, next) => {
 
     //this pipeline gives top 5 teams with most fights by season
     //on the fight model
     const teamsPipeline = [
         {
-            '$unwind': {
-                'path': '$teams'
+            $project: {
+                city: 1,
+                name: 1,
+                numberOfFights: {$cond: { if: {$isArray: "$fights"}, then: {$size: "$fights"}, else: "NA"}}
             }
-        }, {
-            '$group': {
-                '_id': {
-                    'id': '$teams.id', 
-                    'city': '$teams.city', 
-                    'name': '$teams.name'                    
-                }, 
-                'count': {
-                    '$sum': 1
-                }
+        },
+        {
+            $sort: {
+                numberOfFights: -1
             }
-        }, {
-            '$sort': {
-                'count': -1
-            }
-        }, {
-            '$limit': 5
+        },
+        {
+            $limit: 5
         }
     ];
 
@@ -31,26 +27,19 @@ const topFive = (model) => async(req, res, next) => {
 
     const playersPipeline = [
         {
-            '$unwind': {
-                'path': '$players'
+            $project: {
+                firstName: 1,
+                lastName: 1,
+                numberOfFights: {$cond: { if: {$isArray: "$fights"}, then: {$size: "$fights"}, else: "NA"}}
             }
-        }, {
-            '$group': {
-                '_id': {
-                    'id': '$players.id', 
-                    'firstName': '$players.firstName', 
-                    'lastName': '$players.lastName'                    
-                }, 
-                'count': {
-                    '$sum': 1
-                }
+        },
+        {
+            $sort: {
+                numberOfFights: -1
             }
-        }, {
-            '$sort': {
-                'count': -1
-            }
-        }, {
-            '$limit': 5
+        },
+        {
+            $limit: 5
         }
     ];
 
@@ -66,8 +55,8 @@ const topFive = (model) => async(req, res, next) => {
         playersPipeline.unshift(season);
     }
 
-    let teamsResult = await model.aggregate(teamsPipeline);
-    let playersResult = await model.aggregate(playersPipeline);
+    let teamsResult = await Team.aggregate(teamsPipeline);
+    let playersResult = await Player.aggregate(playersPipeline);
 
     res.topFiveTeams = teamsResult;
     res.topFivePlayers = playersResult;

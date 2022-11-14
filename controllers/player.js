@@ -48,7 +48,7 @@ exports.playerSearch = asyncHandler(async (req, res, next) => {
 //@route    POST /api/v1/players/
 //@access   Private - logged in user
 exports.createPlayer = asyncHandler(async (req, res, next) => {
-    console.log('here')
+    // console.log('here')
     //action rating average - freq counter
     let actionRating = {
         average: 0,
@@ -144,7 +144,7 @@ const sendPopulatedResponse = asyncHandler(async function (reqResObj, player, st
                 player.fights
             },
             // 'season.season': reqResObj.req.query.season
-        }).sort({'date': 1});
+        }).sort({'date': 1}).select('-league.fights -league.games');
     
         //Get games
         // let gameDocumentArray = await Game.find({

@@ -17,6 +17,8 @@ const Player = require('../models/Player');
 //@access   Public
 exports.getAllFights = asyncHandler(async (req, res, next) => {
     //use advanced results middleware to paginate and process filtering
+    // console.log(res.advancedResults)
+    // console.log('from controller')
     res.status(200).json(res.advancedResults);
     // let fights = await Fight.find();
 

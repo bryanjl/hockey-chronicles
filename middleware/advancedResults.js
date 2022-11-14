@@ -7,6 +7,8 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
   const startIndex = (page - 1) * limit;
   const endIndex = page * limit;
   
+  
+
   let pagination = {
       page,
       limit
@@ -14,47 +16,10 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
 
   let query = [];
 
-  if(searchIndex === 'default'){
-    if(req.query.term) {
-      query = [
-        {
-          '$search': {
-            'index': 'default',
-            'text': {
-              'query': req.query.term,
-              'path': {
-                'wildcard': '*'
-              },
-              // 'fuzzy': {}
-            }
-          }
-        }
-      ]
-    } else {
-      query = [
-        {$match: {}}
-      ]
-    }
-  }
-
+  console.log(searchIndex)
   if(searchIndex === 'fights' || searchIndex === 'games'){
-
-    if(req.query.season && !req.query.league){
-      query = [
-        {
-          '$search': {
-            'index': searchIndex,
-            'phrase': {
-              
-                'query': req.query.season,
-                'path': 'season.season',
-                // 'allowAnalyzedField': true
-              },
-
-          }
-        }
-      ]
-    } else if(req.query.season && req.query.league){
+    
+    if(req.query.season && req.query.league){
       query = [
         {
           '$search': {
@@ -76,23 +41,42 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
               ]
             }
           }
-        }
+        },
+        // {
+        //   '$project': { 'league.fights': 0, 'league.games': 0 }
+        // }
       ]
-    } else if(req.query.league && !req.query.season){
+    } else if (req.query.league && !req.query.season) {
       query = [
         {
           '$search': {
             'index': searchIndex,
             'phrase': {
-              
-                'query': req.query.league,
-                'path': 'league.name'
-                // 'allowAnalyzedField': true
-              }, 
+              'query': req.query.league,
+              'path': 'league.name'
+            },
           }
-        }
+        },
+        // {
+        //   '$project': { 'league.fights': 0, 'league.games': 0 }
+        // }
       ]
-    } else if(req.query.term){
+    } else if (req.query.season && !req.query.league) {
+      query = [
+        {
+          '$search': {
+            'index': searchIndex,
+            'phrase': {
+              'query': req.query.season,
+              'path': 'season.season'
+            },
+          }
+        },
+        // {
+        //   '$project': { 'league.fights': 0, 'league.games': 0 }
+        // }
+      ]
+    } else if (req.query.term) {
       query = [
         {
           '$search': {
@@ -101,48 +85,41 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
               'query': req.query.term,
               'path': {
                 'wildcard': '*'
-              },
-              'fuzzy': {}
+              }
             }
           }
-        }
+        },
+
       ]
     } else {
+      console.log('here')
       query = [
-          {$match: {}}
+        {
+          '$match': {}
+        }
       ]
     }
   }
 
+  if (searchIndex === 'players') {
+    query = [
+      {
+        '$search': {
+          'index': searchIndex,
+          'text': {
+            'query': req.query.term,
+            'path': {
+              'wildcard': '*'
+            },
+            // fuzzy: {'maxEdits': 2.0}
+          }
+        }
+      },
+    ]
+  }
+
   try {
     
-  
-  
-  //get the total results with no limit
-  // let result = await model.aggregate(query);
-  //add totals to pagination
-    let totalDocuments;
-  if(!req.query.season && !req.query.league && !req.query.term){
-      totalDocuments = await model.count();
-  } else {
-      let countQuery = [...query];
-      countQuery.push({
-        $count: 'totalDocuments'
-      })
-      totalDocuments = await model.aggregate(countQuery);
-      if(totalDocuments.length === 0) {
-        totalDocuments = 0;
-      } else {
-        totalDocuments = totalDocuments[0].totalDocuments;
-      }
-      
-  }
-  
-
-  pagination.totalDocuments = totalDocuments;
-  pagination.totalPages = Math.ceil(totalDocuments / limit);
-  
-
   let sort = {};
   sort.$sort = {};
   sort.$sort[`${sortBy}`] = 1;
@@ -150,16 +127,30 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
   //push the limit, sort and skip to the query
   query = query.concat([
       sort,
-      {$skip: startIndex},
-      {$limit: limit}
+      {
+        '$project': { 'league.fights': 0, 'league.games': 0 }
+      },
+     
+      {
+        '$facet': {
+          'results': [      
+            {$skip: startIndex},
+            {$limit: limit}
+          ],
+        }
+      }
   ]);
 
-  result = await model.aggregate(query);
+  // console.log(query)
 
-  if(populate !== ''){
-      await model.populate(result, {path: populate});
-  }
-  
+  result = await model.aggregate(query,  { 'allowDiskUse': true });
+  // let totalDocuments = result[0].totalCount[0].totalCount;
+
+  // pagination.totalDocuments = totalDocuments;
+  // pagination.totalPages = Math.ceil(totalDocuments / limit);
+
+  result = result[0].results
+
   //save to res object to be used in controller
   res.advancedResults = {
       success: true,

@@ -20,6 +20,7 @@ exports.getAllTeams = asyncHandler(async (req, res, next) => {
 //@access   Public
 exports.getTeam = asyncHandler(async (req, res, next) => {
     let team = await Team.findById(req.params.id);
+    // console.log(team)
     if(!team){
         return next(new ErrorResponse(`Team with ID ${req.params.id} Not Found`, 404));
     }
@@ -28,7 +29,7 @@ exports.getTeam = asyncHandler(async (req, res, next) => {
         req,
         res
     }
-
+    // console.log(reqResObj)
     if(req.query.season){
         sendPopulatedResponse(reqResObj, team, 200);
     } else {
@@ -150,7 +151,7 @@ const sendPopulatedResponse = asyncHandler(async function (reqResObj, team, stat
             team.fights
         },
         'season.season': reqResObj.req.query.season
-    }).sort({'date': 1});
+    }).select('-league.fights -league.games -comments -videoLink -unfair -featuredFight -tookPlaceAt ');
 
     //Get games
     let gameDocumentArray = await Game.find({
@@ -158,9 +159,18 @@ const sendPopulatedResponse = asyncHandler(async function (reqResObj, team, stat
             team.games
         },
         'season.season': reqResObj.req.query.season
-    }).sort({'date': 1});
+    }).select('-league.fights -league.games');
 
     team = await Team.findById(team._id).select('-games -fights');
+
+    // console.log(team)
+
+    team.fights = [];
+    team.games = [];
+
+    // console.log(fightDocumentArray.length)
+
+    // console.log(team)
 
     reqResObj.res.status(statusCode).json({
         success: true,

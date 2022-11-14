@@ -22,7 +22,7 @@ const router = express.Router();
 
 router
     .route('/')
-    .get(advancedResults(Player, 'lastName', 'default'), getAllPlayers)
+    .get(advancedResults(Player, 'lastName', 'players'), getAllPlayers)
     .post(upload.single('playerImg'), createPlayer);
     
 router  

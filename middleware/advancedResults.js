@@ -118,6 +118,23 @@ const advancedResults = (model, sortBy, searchIndex, populate = '') => async(req
     ]
   }
 
+  if (searchIndex === 'teams') {
+    query = [
+      {
+        '$search': {
+          'index': searchIndex,
+          'text': {
+            'query': req.query.term,
+            'path': {
+              'wildcard': '*'
+            },
+            // fuzzy: {'maxEdits': 2.0}
+          }
+        }
+      },
+    ]
+  }
+
   try {
     
   let sort = {};

@@ -319,13 +319,19 @@ exports.topFiveMostFights = asyncHandler(async(req, res, next) => {
 //@route    GET /api/v1/fights/featuredfight
 //@access   Public
 exports.getFeaturedFight = asyncHandler(async(req, res, next) => {
-    let fight = await Fight.findOne({ featuredFight: true });
+    let fight = await Fight.findOne({ featuredFight: true }).select(
+        '-league -game -tookPlaceAt -createdBy -createdAt -time -winBy -unfair -fightType -gameType -outcome -comments -season -teams'
+    );
 
     if(!fight){
         return next(new ErrorResponse(`Cannot find featured fight`, 404));
     }
 
-    sendPopulatedResponse(fight, 200, res);
+    res.status(200).json({
+        success: true,
+        data: fight
+    })
+    //sendPopulatedResponse(fight, 200, res);
 });
 
 //@desc     Set the featured fight

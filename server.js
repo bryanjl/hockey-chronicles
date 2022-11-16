@@ -23,6 +23,10 @@ const auth = require('./routes/auth');
 const search = require('./routes/search');
 const admin = require('./routes/admin');
 const stats = require('./routes/stats');
+const topics = require('./routes/Forum/topic');
+const forums = require('./routes/Forum/forum');
+const threads = require('./routes/Forum/thread');
+const posts = require('./routes/Forum/post');
 
 
 //conect to DB
@@ -80,6 +84,10 @@ app.use('/api/v1/auth', auth);
 app.use('/api/v1/search', search);
 app.use('/api/v1/admin', admin);
 app.use('/api/v1/stats', stats);
+app.use('/api/v1/forum/topics', topics);
+app.use('/api/v1/forum/forums', forums);
+app.use('/api/v1/forum/threads', threads);
+app.use('/api/v1/forum/posts', posts);
 
 
 //Mount Error handler

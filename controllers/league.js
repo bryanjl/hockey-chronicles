@@ -8,7 +8,13 @@ const ErrorResponse = require('../utils/ErrorResponse');
 //@route    GET /api/v1/league/
 //@access   Public
 exports.getAllLeagues = asyncHandler(async (req, res, next) => {
-    res.status(200).json(res.advancedResults);
+    console.log('here')
+    let leagues = await League.find().select('-fights -games');
+    // res.status(200).json(res.advancedResults);
+    res.status(200).json({
+        success: true,
+        data: leagues
+    });
 });
 
 //@desc     Get a league by ID

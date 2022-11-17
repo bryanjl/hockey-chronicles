@@ -6,17 +6,21 @@ const TopicSchema = new mongoose.Schema({
         ref: 'Forum'
     },
     title: {
-        type: String
+        type: String,
+        default: ''
     },
     description: {
-        type: String
+        type: String,
+        default: ''
     },
     createdBy: {
-        type: String
+        type: String,
+        default: 'Anonymous'
     },
     createdAt: {
-        type: Date
+        type: Date,
+        default: Date.now()
     }
 });
 
-module.esports = mongoose.model('Topic', TopicSchema);
+module.exports = mongoose.model('Topic', TopicSchema);

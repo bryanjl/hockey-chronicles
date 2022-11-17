@@ -10,16 +10,20 @@ const ForumSchema = new mongoose.Schema({
         ref: 'Thread'
     },
     title: {
-        type: String
+        type: String,
+        default: ''
     },
     description: {
-        type: String
+        type: String,
+        default: ''
     },
     createdBy: {
-        type: String
+        type: String,
+        default: 'Anonymous'
     },
     createdAt: {
-        type: Date
+        type: Date,
+        default: Date.now()
     }
 });
 

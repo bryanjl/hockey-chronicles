@@ -5,10 +5,10 @@ const ForumSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'Topic'
     },
-    thread: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'Thread'
-    },
+    // thread: {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: 'Thread'
+    // },
     title: {
         type: String,
         default: ''

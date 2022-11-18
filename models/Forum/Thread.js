@@ -5,10 +5,10 @@ const ThreadSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: 'Forum'
     },
-    posts: {
-        type: [mongoose.Schema.ObjectId],
-        ref: 'Post'
-    },
+    // posts: {
+    //     type: [mongoose.Schema.ObjectId],
+    //     ref: 'Post'
+    // },
     title: {
         type: String
     },

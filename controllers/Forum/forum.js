@@ -2,7 +2,6 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const asyncHandler = require('../../middleware/async');
 
 const Forum = require('../../models/Forum/Forum');
-
 //@desc     Get topic by ID
 //@route    GET /api/v1/forum/forums/[id]
 //@access   Public
@@ -23,6 +22,7 @@ exports.getForum = asyncHandler(async (req, res, next) =>{
 //@access   Private
 exports.createForum = asyncHandler(async (req, res, next) =>{
     try {
+        
         let forum = await Forum.create(req.body);
 
         res.status(200).json({

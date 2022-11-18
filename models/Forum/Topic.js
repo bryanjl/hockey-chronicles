@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const TopicSchema = new mongoose.Schema({
-    forum: {
-        type: [mongoose.Schema.ObjectId],
-        ref: 'Forum'
-    },
+    // forum: {
+    //     type: [mongoose.Schema.ObjectId],
+    //     ref: 'Forum'
+    // },
     title: {
         type: String,
         default: ''

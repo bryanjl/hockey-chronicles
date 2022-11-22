@@ -2,6 +2,20 @@ const ErrorResponse = require('../../utils/ErrorResponse');
 const asyncHandler = require('../../middleware/async');
 
 const Forum = require('../../models/Forum/Forum');
+
+//@desc     Get topic by ID
+//@route    GET /api/v1/forum/forums/[id]
+//@access   Public
+exports.getForums = asyncHandler(async (req, res, next) => {
+    //console.log(req.query.topic)
+    let forums = await Forum.find({'topic': req.query.topic});
+
+    res.status(200).json({
+        success: true,
+        data: forums
+    });
+});
+
 //@desc     Get topic by ID
 //@route    GET /api/v1/forum/forums/[id]
 //@access   Public

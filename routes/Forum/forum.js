@@ -1,6 +1,7 @@
 const express = require('express');
 
 const {
+    getForums,
     getForum,
     createForum,
     updateForum,
@@ -11,6 +12,7 @@ const router = express.Router();
 
 router
     .route('/')
+    .get(getForums)
     .post(createForum);
 
 router  

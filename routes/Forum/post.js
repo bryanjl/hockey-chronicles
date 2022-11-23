@@ -1,6 +1,7 @@
 const express = require('express');
 
 const {
+    getPosts,
     getPost,
     createPost,
     updatePost,
@@ -11,6 +12,7 @@ const router = express.Router();
 
 router
     .route('/')
+    .get(getPosts)
     .post(createPost);
 
 router  

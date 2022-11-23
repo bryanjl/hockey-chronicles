@@ -1,6 +1,7 @@
 const express = require('express');
 
 const {
+    getThreads,
     getThread,
     createThread,
     updateThread,
@@ -11,6 +12,7 @@ const router = express.Router();
 
 router
     .route('/')
+    .get(getThreads)
     .post(createThread);
 
 router  

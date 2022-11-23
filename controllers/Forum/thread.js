@@ -3,6 +3,20 @@ const asyncHandler = require('../../middleware/async');
 
 const Thread = require('../../models/Forum/Thread');
 
+//@desc     Get threads by forum ID
+//@route    GET /api/v1/forum/threads?topic=[id]
+//@access   Public
+exports.getThreads = asyncHandler(async (req, res, next) => {
+    //console.log(req.query.topic)
+    let threads = await Thread.find({'forum': req.query.forum});
+
+    res.status(200).json({
+        success: true,
+        data: threads
+    });
+});
+
+
 //@desc     Get thread by ID
 //@route    GET /api/v1/forum/threads/[id]
 //@access   Public

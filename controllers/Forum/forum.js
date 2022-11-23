@@ -3,8 +3,8 @@ const asyncHandler = require('../../middleware/async');
 
 const Forum = require('../../models/Forum/Forum');
 
-//@desc     Get topic by ID
-//@route    GET /api/v1/forum/forums/[id]
+//@desc     Get forums by topic ID
+//@route    GET /api/v1/forum/forums?topic=[id]
 //@access   Public
 exports.getForums = asyncHandler(async (req, res, next) => {
     //console.log(req.query.topic)
